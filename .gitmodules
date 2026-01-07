@@ -1,0 +1,3 @@
+[submodule "mjlab"]
+	path = mjlab
+	url = https://github.com/rotellini9809/mjlab.git

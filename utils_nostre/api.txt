@@ -1,0 +1,41 @@
+VELOCITY
+
+uv run train Mjlab-Velocity-Flat-Unitree-G1 --env.scene.num-envs 4096
+uv run play Mjlab-Velocity-Flat-Unitree-G1 --wandb-run-path your-org/mjlab/run-id
+
+
+
+TRACKING
+
+uv run train Mjlab-Tracking-Flat-Unitree-G1 --registry-name fratelligpt-sapienza-universit-di-roma-org/wandb-registry-Motions/dance1_subject1 --env.scene.num-envs 4096
+
+uv run play Mjlab-Tracking-Flat-Booster-T1_23 --wandb-run-path your-org/mjlab/run-id
+
+
+uv run python -m mjlab.rl.train  --task Mjlab-Tracking-Flat-Booster-T1_23 --agent.max-iterations 40000
+
+COPY REGISTRY
+MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
+  --input-file /human_to_robot_output/.. \
+  --output-name motion_name \
+  --input-fps 30 \
+  --output-fps 50 \
+  --render  
+
+API_KEY
+2afebd919c3c3e82e91783cae9df8ee5de971b6f
+
+HUMAN TO ROBOT
+cd /Desktop/SPQR_project_giova_e_simo/mjlab/human_to_robot$
+./scripts/start:human_to_robot.sh
+python video_to_robot.py config.yaml
+
+
+PER GPU
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+
+CONTAINER
+
+docker start -ai eloquent_kirch   PER HUMAN_TO_ROBOT_GPU
+docker start -ai pensive_dewdney   PER HUMAN_TO_ROBOT_CPU    
+docker start -ai gifted_goldstine  PER MJLAB
