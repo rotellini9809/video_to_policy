@@ -11,9 +11,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PARENT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Path to source folder + Dockerfile
+WANDB_ENV_FILE="$SOURCE_DIR/wandb_credentials.env"
 SOURCE_DIR="$PARENT_DIR/mjlab"
 DOCKERFILE_PATH="$SOURCE_DIR/Dockerfile"
 H2R_OUTPUT_DIR="$PARENT_DIR/human_to_robot/output"
+
 
 # Detect interactive terminal
 if [ -t 1 ]; then
@@ -43,6 +45,14 @@ if [ ! -d "$H2R_OUTPUT_DIR" ]; then
     echo "❌ ERROR: human_to_robot output dir not found:"
     echo "   $H2R_OUTPUT_DIR"
     exit 1
+fi
+
+if [ ! -f "$WANDB_ENV_FILE" ]; then
+    echo "⚠ WARNING: W&B env file not found: $WANDB_ENV_FILE"
+    echo "   W&B will run without WANDB_API_KEY unless you set it another way."
+    WANDB_ENV_ARGS=()
+else
+    WANDB_ENV_ARGS=(--env-file "$WANDB_ENV_FILE")
 fi
 
 
@@ -82,6 +92,7 @@ else
 
     "$SCRIPT_DIR"/start_docker.sh \
         --name "$CONTAINER_NAME" \
+        "${WANDB_ENV_ARGS[@]}" \
         --runtime nvidia \
         --volume "$SOURCE_DIR:/app" \
         --volume "$H2R_OUTPUT_DIR:/app/human_to_robot_output:ro" \
