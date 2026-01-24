@@ -12,7 +12,7 @@ uv run train Mjlab-Tracking-Flat-Unitree-G1 --registry-name fratelligpt-sapienza
 uv run play Mjlab-Tracking-Flat-Booster-T1_23 --wandb-run-path your-org/mjlab/run-id
 
 
-uv run python -m mjlab.rl.train  --task Mjlab-Tracking-Flat-Booster-T1_23 --agent.max-iterations 40000
+uv run train  Mjlab-Tracking-Flat-Booster-T1_23 --agent.max-iterations 40000
 
 COPY REGISTRY
 MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
@@ -22,8 +22,6 @@ MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
   --output-fps 50 \
   --render  
 
-API_KEY
-2afebd919c3c3e82e91783cae9df8ee5de971b6f
 
 HUMAN TO ROBOT
 cd /Desktop/SPQR_project_giova_e_simo/mjlab/human_to_robot$

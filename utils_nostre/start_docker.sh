@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+set -Eeuo pipefail
+trap 'echo "❌ ERROR at line $LINENO: $BASH_COMMAND" >&2' ERR
 
 # -------------------- Parse custom flags --------------------
 NO_GPU=0
@@ -33,15 +34,29 @@ DOCKER_X11_ARGS=""
 if [ -n "${DISPLAY:-}" ]; then
   XAUTHORITY_PATH="${XAUTHORITY:-$HOME/.Xauthority}"
   XAUTH_FILE="/tmp/.docker.xauth"
+  XAUTH_FALLBACK_TMP="/tmp/.docker.xauth.$USER"
+  XAUTH_FALLBACK_HOME="$HOME/.docker.xauth"
   DOCKER_X11_ARGS="--env DISPLAY --env QT_X11_NO_MITSHM=1 --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
   if command -v xauth >/dev/null 2>&1; then
-    : > "$XAUTH_FILE"
-    if [ -f "$XAUTHORITY_PATH" ]; then
-      xauth -f "$XAUTHORITY_PATH" nlist "$DISPLAY" 2>/dev/null | sed -e 's/^..../ffff/' | xauth -f "$XAUTH_FILE" nmerge - 2>/dev/null
-    else
-      xauth nlist "$DISPLAY" 2>/dev/null | sed -e 's/^..../ffff/' | xauth -f "$XAUTH_FILE" nmerge - 2>/dev/null
+    # Ensure the path is a writable file so Docker can bind-mount it.
+    if [ -d "$XAUTH_FILE" ] || { [ -e "$XAUTH_FILE" ] && [ ! -w "$XAUTH_FILE" ]; }; then
+      XAUTH_FILE="$XAUTH_FALLBACK_TMP"
     fi
-    DOCKER_X11_ARGS="$DOCKER_X11_ARGS --env XAUTHORITY=$XAUTH_FILE --volume=$XAUTH_FILE:$XAUTH_FILE:ro"
+    if [ -d "$XAUTH_FILE" ] || { [ -e "$XAUTH_FILE" ] && [ ! -w "$XAUTH_FILE" ]; }; then
+      XAUTH_FILE="$XAUTH_FALLBACK_HOME"
+    fi
+    if ! : > "$XAUTH_FILE" 2>/dev/null; then
+      echo "WARNING: Could not create Xauthority file at $XAUTH_FILE; X11 auth may fail." >&2
+      XAUTH_FILE=""
+    fi
+    if [ -n "$XAUTH_FILE" ]; then
+      if [ -f "$XAUTHORITY_PATH" ]; then
+        xauth -f "$XAUTHORITY_PATH" nlist "$DISPLAY" 2>/dev/null | sed -e 's/^..../ffff/' | xauth -f "$XAUTH_FILE" nmerge - 2>/dev/null
+      else
+        xauth nlist "$DISPLAY" 2>/dev/null | sed -e 's/^..../ffff/' | xauth -f "$XAUTH_FILE" nmerge - 2>/dev/null
+      fi
+      DOCKER_X11_ARGS="$DOCKER_X11_ARGS --env XAUTHORITY=$XAUTH_FILE --volume=$XAUTH_FILE:$XAUTH_FILE:ro"
+    fi
   elif [ -f "$XAUTHORITY_PATH" ]; then
     DOCKER_X11_ARGS="$DOCKER_X11_ARGS --env XAUTHORITY=$XAUTHORITY_PATH --volume=$XAUTHORITY_PATH:$XAUTHORITY_PATH:ro"
   fi
@@ -59,8 +74,11 @@ if [ "$NO_GPU" -eq 1 ]; then
 else
   dpkg -l | grep nvidia-container-toolkit &> /dev/null
   HAS_NVIDIA_TOOLKIT=$?
-  which nvidia-docker > /dev/null
-  HAS_NVIDIA_DOCKER=$?
+  if command -v nvidia-docker >/dev/null 2>&1; then
+    HAS_NVIDIA_DOCKER=0
+  else
+    HAS_NVIDIA_DOCKER=1
+  fi
 
   if [ $HAS_NVIDIA_TOOLKIT -eq 0 ]; then
     docker_version=$(docker version --format '{{.Client.Version}}' | cut -d. -f1)
