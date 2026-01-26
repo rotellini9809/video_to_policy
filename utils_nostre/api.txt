@@ -51,3 +51,16 @@ git commit -m "Describe your change"
 git push --force-with-lease origin main
 
 per pushare su videotopolicy e aggiornare i submoduli (fare prima il push dei submoduli e poi questo!!!)
+cd video_to_policy
+git add .
+git commit -m "aggiornamento submodule"
+git push 
+
+come is pulla !!!!! seguire attentamente senno estremi casini si creano
+
+per pullare bisogna farlo da video_to_policy che da solo aggiorna i submoduli
+non fare pull da submoduli per dio
+
+git pull (video_to_policy)
+git submodule update --init --recursive "nome_submodulo_opzionale"
+

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -Eeuo pipefail
 trap 'echo "❌ ERROR at line $LINENO: $BASH_COMMAND" >&2' ERR
-
+DOCKER_COMMAND="docker run"
 # -------------------- Parse custom flags --------------------
 NO_GPU=0
 PASSTHRU_ARGS=()
@@ -68,33 +68,14 @@ fi
 # Settings required for having nvidia GPU acceleration inside the docker
 DOCKER_GPU_ARGS=""
 
-# If user requested NO GPU, disable GPU args and force plain docker run
-if [ "$NO_GPU" -eq 1 ]; then
-  DOCKER_COMMAND="docker run"
-else
-  dpkg -l | grep nvidia-container-toolkit &> /dev/null
-  HAS_NVIDIA_TOOLKIT=$?
-  if command -v nvidia-docker >/dev/null 2>&1; then
-    HAS_NVIDIA_DOCKER=0
-  else
-    HAS_NVIDIA_DOCKER=1
-  fi
+#rimuevere questa parte sembra aver fixato il problema da pèrovare sulla mia wsl2
+#if command -v nvidia-smi &> /dev/null; then    
+#    echo "✅ NVIDIA detected, enabling GPU"
+#    DOCKER_GPU_ARGS="--gpus all"
+#else
+#    echo "⚠️ NVIDIA not detected, running CPU-only"
+#fi
 
-  if [ $HAS_NVIDIA_TOOLKIT -eq 0 ]; then
-    docker_version=$(docker version --format '{{.Client.Version}}' | cut -d. -f1)
-    if [ "$docker_version" -ge 19 ]; then
-      DOCKER_COMMAND="docker run --gpus all"
-    else
-      DOCKER_COMMAND="docker run --runtime=nvidia"
-    fi
-  elif [ $HAS_NVIDIA_DOCKER -eq 0 ]; then
-    DOCKER_COMMAND="nvidia-docker run"
-  else
-    echo "Running without nvidia-docker, if you have an NVidia card you may need it to have GPU acceleration"
-    DOCKER_COMMAND="docker run"
-  fi
-
-fi
 
 DOCKER_NETWORK_ARGS="" # --net host
 if [[ " ${PASSTHRU_ARGS[*]} " == *" --net "* ]]; then
