@@ -1,66 +1,156 @@
+========================
+MJLAB / VIDEO_TO_POLICY
+USAGE + GIT WORKFLOW
+========================
+
+
+========================
 VELOCITY
+========================
 
 uv run train Mjlab-Velocity-Flat-Unitree-G1 --env.scene.num-envs 4096
-uv run play Mjlab-Velocity-Flat-Unitree-G1 --wandb-run-path your-org/mjlab/run-id
+
+uv run play  Mjlab-Velocity-Flat-Unitree-G1 \
+  --wandb-run-path your-org/mjlab/run-id
 
 
-
+========================
 TRACKING
+========================
 
-uv run train Mjlab-Tracking-Flat-Unitree-G1 --registry-name fratelligpt-sapienza-universit-di-roma-org/wandb-registry-Motions/dance1_subject1 --env.scene.num-envs 4096
+uv run train Mjlab-Tracking-Flat-Unitree-G1 \
+  --registry-name fratelligpt-sapienza-universit-di-roma-org/wandb-registry-Motions/dance1_subject1 \
+  --env.scene.num-envs 4096
 
-uv run play Mjlab-Tracking-Flat-Booster-T1_23 --wandb-run-path your-org/mjlab/run-id
+uv run play Mjlab-Tracking-Flat-Booster-T1_23 \
+  --wandb-run-path your-org/mjlab/run-id
+
+uv run train Mjlab-Tracking-Flat-Booster-T1_23 \
+  --agent.max-iterations 40000
 
 
-uv run train  Mjlab-Tracking-Flat-Booster-T1_23 --agent.max-iterations 40000
+========================
+COPY REGISTRY (CSV -> NPZ)
+========================
 
-COPY REGISTRY
 MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
   --input-file /human_to_robot_output/.. \
   --output-name motion_name \
   --input-fps 30 \
   --output-fps 50 \
-  --render  
+  --render
 
 
+========================
 HUMAN TO ROBOT
-cd /Desktop/SPQR_project_giova_e_simo/mjlab/human_to_robot$
+========================
+
+cd /Desktop/SPQR_project_giova_e_simo/mjlab/human_to_robot
 ./scripts/start:human_to_robot.sh
 python video_to_robot.py config.yaml
 
 
-PER GPU
-pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+========================
+GPU SETUP
+========================
 
-CONTAINER
-
-docker start -ai eloquent_kirch   PER HUMAN_TO_ROBOT_GPU
-docker start -ai pensive_dewdney   PER HUMAN_TO_ROBOT_CPU    
-docker start -ai gifted_goldstine  PER MJLAB
+pip3 install torch torchvision \
+  --index-url https://download.pytorch.org/whl/cu130
 
 
+========================
+DOCKER CONTAINERS
+========================
 
 
 
-come si pusha !!!!! seguire attentamente senno estremi casini si creano
 
-per pushare il submodule mjlab
+========================================================
+GIT WORKFLOW (LEGGERE CON ATTENZIONE O SI CREANO CASINI)
+========================================================
+
+
+--------------------------------------------------------
+REGOLE D'ORO
+--------------------------------------------------------
+
+- NON committare MAI in un submodule se vedi:
+  "HEAD detached"
+
+- Prima di modificare un submodule:
+  git checkout main
+
+- Il repo padre NON salva i file del submodule,
+  salva SOLO il commit hash (puntatore)
+
+- I conflitti con l'upstream si risolvono DOPO,
+  non durante il lavoro quotidiano
+
+
+--------------------------------------------------------
+PUSH DEL SUBMODULE (mjlab - fork)
+--------------------------------------------------------
+
 cd video_to_policy/mjlab
+
+# ATTACCATI SEMPRE A MAIN
+git checkout main
+
+# commit delle modifiche
 git add .
 git commit -m "Describe your change"
+
+# push sul TUO fork
+# usare force-with-lease se il fork è stato force-pushato in passato
 git push --force-with-lease origin main
 
-per pushare su videotopolicy e aggiornare i submoduli (fare prima il push dei submoduli e poi questo!!!)
+
+--------------------------------------------------------
+PUSH DEL REPO PADRE (video_to_policy)
+--------------------------------------------------------
+
+# PRIMA pushare SEMPRE il submodule
+
 cd video_to_policy
-git add .
-git commit -m "aggiornamento submodule"
-git push 
 
-come is pulla !!!!! seguire attentamente senno estremi casini si creano
+# il repo padre salva SOLO il puntatore al submodule
+git add mjlab
+git commit -m "Update mjlab submodule"
+git push
 
-per pullare bisogna farlo da video_to_policy che da solo aggiorna i submoduli
-non fare pull da submoduli per dio
 
-git pull (video_to_policy)
-git submodule update --init --recursive "nome_submodulo_opzionale"
+--------------------------------------------------------
+PULL CORRETTO (NON fare pull nei submoduli)
+--------------------------------------------------------
 
+cd video_to_policy
+
+# aggiorna il repo padre
+git pull
+
+# aggiorna SOLO il submodule che serve
+git submodule update --init --recursive mjlab
+
+
+--------------------------------------------------------
+CASO SPECIALE: ALTRO PC / FORK FORCE-PUSHATO
+--------------------------------------------------------
+
+Se sei DENTRO un submodule e vuoi solo allinearti
+al TUO fork (senza integrare upstream):
+
+cd video_to_policy/mjlab
+git fetch origin
+git checkout main
+git reset --hard origin/main
+
+
+--------------------------------------------------------
+RIASSUNTO MENTALE (STAMPALO IN TESTA)
+--------------------------------------------------------
+
+- Modifico submodule  -> commit + push nel submodule
+- Poi repo padre      -> commit del puntatore
+- Pull                -> SOLO dal repo padre
+- Submodule update    -> SOLO con git submodule update
+- HEAD detached       -> NON committare
