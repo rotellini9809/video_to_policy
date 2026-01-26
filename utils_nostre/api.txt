@@ -37,3 +37,17 @@ CONTAINER
 docker start -ai eloquent_kirch   PER HUMAN_TO_ROBOT_GPU
 docker start -ai pensive_dewdney   PER HUMAN_TO_ROBOT_CPU    
 docker start -ai gifted_goldstine  PER MJLAB
+
+
+
+
+
+come si pusha !!!!! seguire attentamente senno estremi casini si creano
+
+per pushare il submodule mjlab
+cd video_to_policy/mjlab
+git add .
+git commit -m "Describe your change"
+git push --force-with-lease origin main
+
+per pushare su videotopolicy e aggiornare i submoduli (fare prima il push dei submoduli e poi questo!!!)
