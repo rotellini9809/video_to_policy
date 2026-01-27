@@ -132,7 +132,7 @@ PUSH DEL REPO PADRE (video_to_policy)
 
 # PRIMA pushare SEMPRE il submodule
 
-cd video_to_policy
+cd .. (video_to_policy)
 
 # il repo padre salva SOLO il puntatore al submodule
 git add mjlab
