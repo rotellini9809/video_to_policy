@@ -74,17 +74,37 @@ GIT WORKFLOW (LEGGERE CON ATTENZIONE O SI CREANO CASINI)
 REGOLE D'ORO
 --------------------------------------------------------
 
-- NON committare MAI in un submodule se vedi:
-  "HEAD detached"
-
-- Prima di modificare un submodule:
-  git checkout main
-
 - Il repo padre NON salva i file del submodule,
   salva SOLO il commit hash (puntatore)
 
-- I conflitti con l'upstream si risolvono DOPO,
-  non durante il lavoro quotidiano
+- "HEAD detached" nel submodule = stato normale dopo submodule update.
+  In quello stato: NON committare.
+
+- Se devi lavorare nel submodule (commit/push):
+  attaccati SEMPRE a main (git switch/checkout main)
+
+- Obiettivo di questo workflow:
+  mjlab deve stare SEMPRE al latest del TUO fork (origin/main)
+
+
+--------------------------------------------------------
+SETUP (UNA SOLA VOLTA): submodule traccia main
+--------------------------------------------------------
+
+Nel repo padre (video_to_policy) in .gitmodules deve esserci:
+
+[submodule "mjlab"]
+  path = mjlab
+  url = https://github.com/rotellini9809/mjlab.git
+  branch = main
+
+Poi esegui:
+
+cd video_to_policy
+git submodule sync --recursive
+git add .gitmodules
+git commit -m "mjlab tracks main"
+git push
 
 
 --------------------------------------------------------
@@ -93,8 +113,9 @@ PUSH DEL SUBMODULE (mjlab - fork)
 
 cd video_to_policy/mjlab
 
-# ATTACCATI SEMPRE A MAIN
-git checkout main
+# ATTACCATI SEMPRE A MAIN (mai committare in detached)
+git switch main || git checkout main
+git pull --ff-only
 
 # commit delle modifiche
 git add .
@@ -120,7 +141,7 @@ git push
 
 
 --------------------------------------------------------
-PULL CORRETTO (NON fare pull nei submoduli)
+PULL CORRETTO (mjlab SEMPRE ALL'ULTIMO COMMIT DEL TUO FORK)
 --------------------------------------------------------
 
 cd video_to_policy
@@ -128,29 +149,16 @@ cd video_to_policy
 # aggiorna il repo padre
 git pull
 
-# aggiorna SOLO il submodule che serve
-git submodule update --init --recursive mjlab
+# aggiorna mjlab al latest del branch configurato (main sul fork)
+git submodule update --init --recursive --remote --merge mjlab
+
+# evita detached se poi devi lavorare/subito committare nel submodule
+git -C mjlab switch main || true
+git -C mjlab pull --ff-only || true
 
 
 --------------------------------------------------------
-CASO SPECIALE: ALTRO PC / FORK FORCE-PUSHATO
+CASO SPECIALE: ALLINEAMENTO HARD AL FORK (SE SI INCASTRA)
 --------------------------------------------------------
 
-Se sei DENTRO un submodule e vuoi solo allinearti
-al TUO fork (senza integrare upstream):
-
-cd video_to_policy/mjlab
-git fetch origin
-git checkout main
-git reset --hard origin/main
-
-
---------------------------------------------------------
-RIASSUNTO MENTALE (STAMPALO IN TESTA)
---------------------------------------------------------
-
-- Modifico submodule  -> commit + push nel submodule
-- Poi repo padre      -> commit del puntatore
-- Pull                -> SOLO dal repo padre
-- Submodule update    -> SOLO con git submodule update
-- HEAD detached       -> NON committare
+Se sei DENTRO mjlab e vu

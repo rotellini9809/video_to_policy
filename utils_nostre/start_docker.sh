@@ -65,16 +65,12 @@ if [ -n "${DISPLAY:-}" ]; then
   fi
 fi
 
+
 # Settings required for having nvidia GPU acceleration inside the docker
 DOCKER_GPU_ARGS=""
-
-#rimuevere questa parte sembra aver fixato il problema da pèrovare sulla mia wsl2
-#if command -v nvidia-smi &> /dev/null; then    
-#    echo "✅ NVIDIA detected, enabling GPU"
-#    DOCKER_GPU_ARGS="--gpus all"
-#else
-#    echo "⚠️ NVIDIA not detected, running CPU-only"
-#fi
+if [ "$NO_GPU" -eq 0 ]; then
+  DOCKER_GPU_ARGS="--gpus all"
+fi
 
 
 DOCKER_NETWORK_ARGS="" # --net host
