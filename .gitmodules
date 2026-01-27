@@ -1,6 +1,7 @@
 [submodule "mjlab"]
 	path = mjlab
 	url = https://github.com/rotellini9809/mjlab.git
+	branch = main
 [submodule "human_to_robot"]
 	path = human_to_robot
 	url = https://github.com/michelebri/human_to_robot.git
