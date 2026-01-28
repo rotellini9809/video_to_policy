@@ -34,7 +34,7 @@ COPY REGISTRY (CSV -> NPZ)
 ========================
 
 MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
-  --input-file /human_to_robot_output/.. \
+  --input-file output_video/.. \
   --output-name motion_name \
   --input-fps 30 \
   --output-fps 50 \

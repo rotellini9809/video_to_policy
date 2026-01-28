@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PARENT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-SOURCE_DIR="$PARENT_DIR/human_to_robot_nostra"
+SOURCE_DIR="$PARENT_DIR/human_to_robot"
 DOCKERFILE_PATH="$SOURCE_DIR/Dockerfile"
 CONFIG_PATH="$SOURCE_DIR/config.yaml"
 
@@ -67,8 +67,8 @@ if [ "$DEVICE" != "cpu" ] && [ "$DEVICE" != "cuda" ]; then
 fi
 
 # ==================== Names & target ====================
-IMAGE_NAME="human_to_robot_${DEVICE}_v2"
-CONTAINER_NAME="il_prescelto_${DEVICE}_v2"
+IMAGE_NAME="human_to_robot_${DEVICE}_v2_prova"
+CONTAINER_NAME="il_prescelto_${DEVICE}_v2_prova"
 BUILD_TARGET="$DEVICE"
 
 echo "=== Selected device: $DEVICE"
@@ -186,10 +186,11 @@ else
 fi
 
 EXTRA_ARGS=()
-if [ "$DEVICE" = "cpu" ]; then
+
+#if [ "$DEVICE" = "cpu" ]; then
   # start_docker.sh must support this flag (as we modified earlier)
-  EXTRA_ARGS+=(--no-gpu)
-fi
+#  EXTRA_ARGS+=(--no-gpu)
+#fi
 
 "$START_DOCKER_SH" \
   "${EXTRA_ARGS[@]}" \
