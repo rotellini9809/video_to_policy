@@ -26,7 +26,10 @@ uv run play Mjlab-Tracking-Flat-Booster-T1_23 \
   --wandb-run-path your-org/mjlab/run-id
 
 uv run train Mjlab-Tracking-Flat-Booster-T1_23 \
-  --agent.max-iterations 40000
+  --registry-name fratelligpt-sapienza-universit-di-roma-org/wandb-registry-Motions/dance1_subject1 \
+  --env.scene.num-envs 4096 \
+  --agent.max-iterations 20000
+  --agent.run-name my_run_name
 
 
 ========================
@@ -34,7 +37,7 @@ COPY REGISTRY (CSV -> NPZ)
 ========================
 
 MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
-  --input-file output_video/.. \
+  --input-file output_video.csv/.. \
   --output-name motion_name \
   --input-fps 30 \
   --output-fps 50 \
