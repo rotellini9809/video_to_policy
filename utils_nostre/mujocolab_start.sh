@@ -4,7 +4,7 @@ echo "START_DOCKER ARGS: $*"
 set -e  # Stop on error
 
 IMAGE_NAME="mjlab"
-CONTAINER_NAME="majin_bu_prova"
+CONTAINER_NAME="majin_bu"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PARENT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -124,7 +124,7 @@ echo "Container not found — creating new one."
   --name "$CONTAINER_NAME" \
   "${WANDB_ENV_ARGS[@]}" \
   --volume "$SOURCE_DIR:/app" \
-  --volume "$OUTPUTVIDEO_DIR:/app/outputvideo" \
+  --volume "$OUTPUTVIDEO_DIR:/app/human_to_robot_output" \
   --publish 8080:8080 \
   $INTERACTIVE \
   -- \

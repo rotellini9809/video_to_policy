@@ -36,8 +36,11 @@ uv run train Mjlab-Tracking-Flat-Booster-T1_23 \
 COPY REGISTRY (CSV -> NPZ)
 ========================
 
-MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \
-  --input-file output_video.csv/.. \
+csv_to_npz.py :  per unitree G1
+csv_to_npz_booster_t1_23dof.py :  per booster T1 23 dof
+
+MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \ 
+  --input-file human_to_robot_output/.. \
   --output-name motion_name \
   --input-fps 30 \
   --output-fps 50 \
@@ -165,3 +168,11 @@ CASO SPECIALE: ALLINEAMENTO HARD AL FORK (SE SI INCASTRA)
 --------------------------------------------------------
 
 Se sei DENTRO mjlab e vu
+
+
+
+
+
+per modificar ei file in caso docker ti toglie il permesso
+sudo chown -R vodka:vodka /home/vodka/Desktop/SPQR_project_giova_e_simo/video_to_policy
+sudo chmod -R u+rwX /home/vodka/Desktop/SPQR_project_giova_e_simo/video_to_policy
