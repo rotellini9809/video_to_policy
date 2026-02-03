@@ -1,0 +1,117 @@
+🎥 Lista Completa Clip – Motion Controller (Stage 1)
+
+
+Guida BREVE per tagliare manualmente le clip
+🎬 Durata
+
+4–6 secondi per quasi tutto
+
+6–8 secondi solo per caduta + rialzata o tuffo + rialzata
+
+👉 Se sei indeciso: 5 secondi è lo standard
+
+🔁 Overlap
+
+When extracting clips from long motion recordings, use temporal overlap to improve robustness. 
+First, choose a fixed clip length (typically 4–6 seconds). 
+Then, after cutting one clip, start the next clip roughly halfway through the previous one (about 50% overlap). 
+For example, from a long sequence, extract clips starting at 0s, 2.5s, and 5s for 5-second clips. 
+This ensures that the same motion is seen starting at different temporal points (beginning, middle, end), 
+which helps the motor controller handle transitions and mid-motion initialization. 
+Precise timing is not required; starting the next clip approximately halfway through is sufficient.
+
+
+✅ Regola d’oro
+
+Ogni clip deve contenere almeno UNA transizione
+(es. fermo → movimento, movimento → stop, caduta → rialzata)
+
+Se è solo “stare fermo” → scarta.
+
+
+4️⃣ Lista RIDOTTA e FATTIBILE (consigliata)
+
+Se dovessi dirti il minimo che funziona, farei così:
+
+🟢 LOCOMOTION (10 clip)
+
+Camminata avanti + stop (lenta)
+
+Camminata avanti + stop (veloce)
+
+Camminata indietro + stop
+
+Shuffle sinistra
+
+Shuffle destra
+
+Shuffle sinistra → stop → shuffle destra
+
+Scatto avanti (2 passi) → stop
+
+Scatto indietro → stop
+
+Rotazione 90° + cammino breve
+
+Rotazione 180° + stop
+
+🟡 POSTURA / STABILITÀ (5 clip)
+
+Ready stance + spostamenti peso
+
+Crouch → stand
+
+Brace da fermo
+
+Brace dopo piccolo passo
+
+Micro-perdita equilibrio + recupero
+
+🔴 CADUTA / RECOVERY (8 clip)
+
+Caduta laterale sinistra + rialzata
+
+Caduta laterale destra + rialzata
+
+Supino → rialzata
+
+Prono → rialzata
+
+Rotolamento → rialzata
+
+Caduta da movimento + rialzata
+
+Recupero lento
+
+Recupero veloce
+
+🔵 TUFFI (facoltativi ma ora inclusi) (5–7 clip)
+
+Tuffo basso sinistra
+
+Tuffo basso destra
+
+Tuffo medio sinistra
+
+Tuffo medio destra
+
+Tuffo → rialzata
+
+Salto verticale + atterraggio
+
+Salto + brace
+
+👉 30 clip = ~240 ore
+Già tanto, ma fattibile su settimane, non mesi.
+
+5️⃣ Come massimizzare il valore di OGNI clip
+
+Quando registri una clip:
+
+varia leggermente velocità dentro la clip
+
+non partire sempre dalla stessa posa
+
+non fermarti sempre allo stesso punto
+
+Una singola clip “ricca” vale 5 clip povere.

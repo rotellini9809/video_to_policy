@@ -1,0 +1,268 @@
+# mjlab – Commands & Options
+# --------------------------
+
+# ==========================
+# Portiere env viewer (manual)
+# ==========================
+# Purpose:
+#   Quick visualization of the RoboCup portiere environment with a zero policy.
+#
+# Command:
+uv run python -m mjlab.scripts.view_portiere
+
+# =============================================================================
+# Stage‑1 Motor Controller
+# =============================================================================
+# This section documents the rollout collection and Stage‑1 training commands,
+# including the most important options and when to use them.
+
+
+# ==========================
+# 1) Rollout collection
+# ==========================
+# Purpose:
+#   Collect tracking‑policy rollouts and serialize them into .npz shards for
+#   Stage‑1 motor controller training.
+#
+# Required output format (per shard):
+#   obs, a_clean, done (required)
+#   env_id (saved by default; REQUIRED for safe sequence sampling)
+#
+# Recommended output structure:
+#   ./data/motor_controller_rollouts/<dataset_root>/<wandb_run_name>/
+# The collector creates the run folder automatically from the W&B run name.
+
+# Basic command (W&B run path resolves checkpoint + motion artifact):
+uv run collect-rollouts Mjlab-Tracking-Flat-Booster-T1_23 \
+  --wandb-run-path entity/project/run_id \
+  --num-episodes 200 \
+  --num-envs 64 \
+  --output-dir ./data/motor_controller_rollouts/training_dataset1
+
+# Key options:
+#   --output-dir <path>
+#       REQUIRED. Dataset root folder.
+#       A subfolder named after the W&B run is created automatically.
+#       Recommended: ./data/motor_controller_rollouts/<dataset_root>/
+#
+#   --num-envs <int>
+#       Number of parallel envs for collection (vectorized). Large values
+#       produce more data faster. env_id will be saved per row.
+#
+#   --num-episodes <int>
+#       Total episodes to collect (default is in script). Alternative to --num-steps.
+#
+#   --num-steps <int>
+#       Stop after a fixed number of steps (overrides episodes).
+#
+#   --noise-std <float>
+#       Optional action noise during collection (exploration).
+#
+#   --save-step-in-episode
+#       Saves step_in_episode per row (optional metadata).
+#
+# Output metadata:
+#   Each run folder includes metadata.json with:
+#   - wandb_run_path
+#   - motion_artifact (used by the policy)
+#   - obs/act dims, shard count, etc.
+
+
+# ==========================
+# 2) Stage‑1 training (latent model)
+# ==========================
+# Purpose:
+#   Load rollouts, build sequence‑safe sampling indices, compute normalization
+#   stats, and train a latent model for motor control.
+#
+# Input modes:
+#   --data-dir  = single run folder
+#   --data-root = root folder containing multiple runs (runA, runB, ...)
+#   Choose exactly one.
+
+# ----------
+# VAE‑lite (step mode)
+# ----------
+# Uses per‑step samples:
+#   obs_t [B, obs_dim], a_clean_t [B, act_dim], obs_future [B, k_future, obs_dim]
+#
+uv run train-motor-stage1 \
+  --data-root ./data/motor_controller_rollouts/training_dataset1 \
+  --latent-type vae \
+  --sample-mode step \
+  --k-future 10 \
+  --max-iters 200
+
+# ----------
+# NPMP (chunk mode)
+# ----------
+# Uses sequences:
+#   obs_chunk [B, T, obs_dim]
+#   a_clean_chunk [B, T, act_dim]
+#   obs_future [B, T, k_future, obs_dim]
+#
+uv run train-motor-stage1 \
+  --data-root ./data/motor_controller_rollouts/training_dataset1 \
+  --latent-type npmp \
+  --sample-mode chunk \
+  --chunk-len 32 \
+  --k-future 10 \
+  --max-iters 200 \
+  --beta-kl-warmup-iters 200
+
+# Dry‑run (validate + stats only, no training):
+uv run train-motor-stage1 \
+  --data-root ./data/motor_controller_rollouts/training_dataset1 \
+  --latent-type npmp \
+  --sample-mode chunk \
+  --chunk-len 32 \
+  --k-future 10 \
+  --dry-run
+
+# Key options:
+#   --latent-type {vae,npmp}
+#       vae  -> step mode (obs_t + obs_future)
+#       npmp -> chunk mode (temporal latent model)
+#
+#   --sample-mode {step,chunk}
+#       Must match latent-type (vae->step, npmp->chunk).
+#
+#   --k-future <int>
+#       Future window length used by encoders.
+#
+#   --chunk-len <int>
+#       Sequence length T (only in chunk mode).
+#
+#   --max-iters <int>
+#       Training iterations.
+#
+#   --beta-kl-start / --beta-kl-end / --beta-kl-warmup-iters
+#       KL warmup schedule. Linear ramp from start to end over warmup iters.
+#
+#   --val-frac <float>
+#       Tier‑1 validation split fraction (episode‑based, per run).
+#
+#   --val-batches <int>
+#       Number of validation batches per log interval.
+#
+#   --seed / --val-seed
+#       Seeds for reproducibility.
+#
+#   --log-every <int>
+#       Log/validate cadence (also controls CSV/W&B logging). Default uses ~10% of iters.
+#
+#   --wandb
+#       Enable W&B logging (optional).
+#
+#   --wandb-project / --wandb-entity
+#       W&B project and entity (optional; env vars also work).
+#
+#   --wandb-tags <comma-separated>
+#       Optional tags list, e.g. "stage1,npmp,debug".
+#
+#   WANDB_API_KEY or wandb_api_key (env var)
+#       If set, W&B login happens automatically.
+#       If not set, the script will call wandb.login() and prompt.
+
+# Outputs:
+#   run_dir: <repo>/logs/motor_controller_stage1/<timestamp>/
+#   normalization_stats.npz (obs_mean/std, act_mean/std)
+#   metadata.json (config + dataset summary)
+#   metrics.csv (train/val metrics over time)
+
+# W&B example:
+# (Assumes WANDB_API_KEY is already set in your environment.)
+uv run train-motor-stage1 \
+  --data-root ./data/motor_controller_rollouts/training_dataset1 \
+  --latent-type npmp \
+  --sample-mode chunk \
+  --chunk-len 32 \
+  --k-future 10 \
+  --max-iters 200 \
+  --wandb \
+  --wandb-project motor_controller_stage1 \
+  --wandb-entity <entity> \
+  --wandb-tags stage1,npmp,debug
+
+
+
+final general example:
+uv run train-motor-stage1 \
+  --data-root ./data/motor_controller_rollouts/training_dataset1 \
+  --latent-type npmp \
+  --sample-mode chunk \
+  --chunk-len 32 \
+  --k-future 10 \
+  --max-iters 5000 \
+  --val-frac 0.1 \
+  --seed 0 \
+  --run-name final_test_npmp_chunk32_k10_seed0 \
+  --beta-kl-end 1e-3 \
+  --beta-kl-warmup-iters 2000 \
+  --log-every 50 \
+  --wandb 
+
+
+# ==========================
+# 3) Post‑training evaluation (no render)
+# ==========================
+# Purpose:
+#   Evaluate a trained Stage‑1 NPMP policy in simulation without rendering.
+#   Uses deterministic prior‑only latent rollout (z = mu_p).
+#
+# Required:
+#   --wandb-run-path <entity>/<project>/<run_id>
+#
+# Example:
+uv run eval-motor-stage1 \
+  --wandb-run-path entity/project/run_id \
+  --num-steps 5000 \
+  --num-envs 32 \
+  --checkpoint best
+#
+# Notes:
+#   - Uses model_best.pt by default (fallback to model_last.pt, then model_<iter>.pt).
+#   - Requires normalization_stats.npz and metadata.json in the same W&B run.
+#   - If motion artifact is missing, set:
+#       MJLAB_MOTOR_CONTROLLER_MOTION_FILE=/path/to/motion.npz
+#   - To override the auto‑selected task:
+#       MJLAB_MOTOR_CONTROLLER_TASK_ID=Mjlab-Tracking-Flat-Booster-T1_23
+#
+
+# ==========================
+# 4) Post‑training play (render)
+# ==========================
+# Purpose:
+#   Visualize a trained Stage‑1 NPMP policy with rendering.
+#   Runs until window close / Ctrl+C (or num_steps if provided).
+#
+# Required:
+#   --wandb-run-path <entity>/<project>/<run_id>
+#
+# Example:
+uv run play-motor-stage1 \
+  --wandb-run-path entity/project/run_id \
+  --checkpoint best
+#
+# Optional:
+#   --num-steps <int>   (if <= 0 or omitted, runs indefinitely)
+#   --viewer {auto,native,viser}
+#   --checkpoint {best,last,latest}
+#
+# Notes:
+#   - Uses model_best.pt by default (fallback to model_last.pt, then model_<iter>.pt).
+#   - Requires normalization_stats.npz and metadata.json in the same W&B run.
+#   - If motion artifact is missing, set:
+#       MJLAB_MOTOR_CONTROLLER_MOTION_FILE=/path/to/motion.npz
+#   - To override the auto‑selected task:
+#       MJLAB_MOTOR_CONTROLLER_TASK_ID=Mjlab-Tracking-Flat-Booster-T1_23
+
+
+# ==========================
+# 5) Portiere env viewer
+# ==========================
+# Purpose:
+#   Quick visualization of the RoboCup portiere environment with a zero policy.
+#
+# Example:
+uv run view-portiere
