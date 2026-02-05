@@ -55,35 +55,19 @@ Rotazione 90° + cammino breve
 
 Rotazione 180° + stop
 
+Salto verticale + atterraggio
+
 🟡 POSTURA / STABILITÀ (5 clip)
 
 Ready stance + spostamenti peso
 
 Crouch → stand
 
-Brace da fermo
-
-Brace dopo piccolo passo
-
-Micro-perdita equilibrio + recupero
+Micro-perdita equilibrio + recupero  !!
 
 🔴 CADUTA / RECOVERY (8 clip)
 
-Caduta laterale sinistra + rialzata
-
-Caduta laterale destra + rialzata
-
-Supino → rialzata
-
-Prono → rialzata
-
-Rotolamento → rialzata
-
-Caduta da movimento + rialzata
-
-Recupero lento
-
-Recupero veloce
+fai una task esplorazione reward per mettersi in piedi da supino o prono
 
 🔵 TUFFI (facoltativi ma ora inclusi) (5–7 clip)
 
@@ -91,18 +75,21 @@ Tuffo basso sinistra
 
 Tuffo basso destra
 
-Tuffo medio sinistra
+tutti i tuffi con rialzata
 
-Tuffo medio destra
+🔵 PARATE
 
-Tuffo → rialzata
+allungo il piede destra/sinistra quando in piedi
 
-Salto verticale + atterraggio
+mi accuccio con le braccia verso il basso + rialzata
 
-Salto + brace
+airone destra/sinistra + rialzata
 
-👉 30 clip = ~240 ore
-Già tanto, ma fattibile su settimane, non mesi.
+pugno per rilanciare la palla
+
+parata con rilancio calcio
+
+
 
 5️⃣ Come massimizzare il valore di OGNI clip
 
