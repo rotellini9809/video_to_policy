@@ -21,10 +21,11 @@ TRACKING
 uv run train Mjlab-Tracking-Flat-Unitree-G1 \
   --registry-name fratelligpt-sapienza-universit-di-roma-org/wandb-registry-Motions/dance1_subject1 \
   --env.scene.num-envs 4096
+  --agent.max_iterations 15000
 
 uv run play Mjlab-Tracking-Flat-Booster-T1_23 \
   --wandb-run-path your-org/mjlab/run-id
-  --agent.max_iterations 15000
+  
 
 
 # ==========================
@@ -44,6 +45,17 @@ for artifact in "${artifacts[@]}"; do
     --agent.num_steps_per_env 25 \
     --agent.max_iterations 15000
 done
+
+
+========================
+PUSH GETUP
+========================
+
+uv run train Mjlab-PushGetUp-Flat-Booster-T1_23 \
+  --env.scene.num-envs 4096
+
+uv run play Mjlab-PushGetUp-Flat-Booster-T1_23 \
+  --wandb-run-path your-org/mjlab/run-id
 
 
 ========================

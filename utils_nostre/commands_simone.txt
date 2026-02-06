@@ -258,11 +258,4 @@ uv run play-motor-stage1 \
 #       MJLAB_MOTOR_CONTROLLER_TASK_ID=Mjlab-Tracking-Flat-Booster-T1_23
 
 
-# ==========================
-# 5) Portiere env viewer
-# ==========================
-# Purpose:
-#   Quick visualization of the RoboCup portiere environment with a zero policy.
-#
-# Example:
-uv run view-portiere
+
