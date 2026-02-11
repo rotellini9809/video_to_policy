@@ -18,13 +18,15 @@ uv run play  Mjlab-Velocity-Flat-Unitree-G1 \
 TRACKING
 ========================
 
-uv run train Mjlab-Tracking-Flat-Unitree-G1 \
-  --registry-name fratelligpt-sapienza-universit-di-roma-org/wandb-registry-Motions/dance1_subject1 \
-  --env.scene.num-envs 4096
-  --agent.max_iterations 15000
+uv run train Mjlab-Tracking-Flat-Booster-T1_23 \
+  --registry-name fratelligpt-sapienza-universit-di-roma/csv_to_npz/supercelebration_t1:v0 \
+  --env.scene.num-envs 4096 \
+  --agent.max_iterations 15000 \
+  --agent.run_name buttare 
 
 uv run play Mjlab-Tracking-Flat-Booster-T1_23 \
   --wandb-run-path your-org/mjlab/run-id
+
   
 
 
@@ -57,18 +59,46 @@ uv run train Mjlab-PushGetUp-Flat-Booster-T1_23 \
 uv run play Mjlab-PushGetUp-Flat-Booster-T1_23 \
   --wandb-run-path your-org/mjlab/run-id
 
+uv run python -m mjlab.scripts.play_push_getup \
+   --viewer native \
+  --wandb-run-path your-org/mjlab/run-id
+
 
 ========================
 
 csv_to_npz.py :  per unitree G1
 csv_to_npz_booster_t1_23dof.py :  per booster T1 23 dof
 
-MUJOCO_GL=egl uv run src/mjlab/scripts/csv_to_npz.py \ 
+uv run src/mjlab/scripts/csv_to_npz.py \ 
   --input-file human_to_robot_output/.. \
   --output-name motion_name \
   --input-fps 30 \
   --output-fps 50 \
   --render
+
+# Booster T1 23 dof (single CSV):
+# --output-name is optional; if omitted it uses the CSV filename (stem).
+# Rendering is ON by default; add `--no-render` to skip video generation/logging.
+uv run src/mjlab/scripts/csv_to_npz_booster_t1_23dof.py \
+  --input-file human_to_robot_output/mujoco_csv/booster_t1/my_motion.csv \
+  --input-fps 30 \
+  --output-fps 50
+
+# Booster T1 23 dof (batch from folder):
+# Processes all *.csv recursively and uploads only names not already present on W&B.
+uv run src/mjlab/scripts/csv_to_npz_booster_t1_23dof.py \
+  --root-dir human_to_robot_output/mujoco_csv/booster_t1 \
+  --input-fps 30 \
+  --output-fps 50
+
+# Mirror Booster T1 CSV (single file):
+uv run src/mjlab/scripts/mirror_csv_booster_t1_23dof.py \
+  --input-file human_to_robot_output/mujoco_csv/booster_t1/my_motion.csv
+
+# Mirror Booster T1 CSV (batch folder):
+# Creates *_mirror.csv for each file (skips existing outputs unless --overwrite).
+uv run src/mjlab/scripts/mirror_csv_booster_t1_23dof.py \
+  --root-dir human_to_robot_output/mujoco_csv/booster_t1
 
 
 ========================

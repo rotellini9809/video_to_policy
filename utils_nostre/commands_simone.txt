@@ -10,6 +10,7 @@
 # Command:
 uv run python -m mjlab.scripts.view_portiere
 
+
 # =============================================================================
 # Stage‑1 Motor Controller
 # =============================================================================
@@ -38,6 +39,24 @@ uv run collect-rollouts Mjlab-Tracking-Flat-Booster-T1_23 \
   --num-episodes 200 \
   --num-envs 64 \
   --output-dir ./data/motor_controller_rollouts/training_dataset1
+
+# Batch rollout collection (serial)
+# Put one W&B run path per line:
+rollout_runs=(
+  "entity/project/run_id_01"
+  "entity/project/run_id_02"
+  "entity/project/run_id_03"
+)
+
+DATASET_ROOT=./data/motor_controller_rollouts/training_dataset1
+
+for run_path in "${rollout_runs[@]}"; do
+  uv run collect-rollouts Mjlab-Tracking-Flat-Booster-T1_23 \
+    --wandb-run-path "$run_path" \
+    --num-episodes 200 \
+    --num-envs 64 \
+    --output-dir "$DATASET_ROOT"
+done
 
 # Key options:
 #   --output-dir <path>
@@ -151,11 +170,8 @@ uv run train-motor-stage1 \
 #   --log-every <int>
 #       Log/validate cadence (also controls CSV/W&B logging). Default uses ~10% of iters.
 #
-#   --wandb
-#       Enable W&B logging (optional).
-#
 #   --wandb-project / --wandb-entity
-#       W&B project and entity (optional; env vars also work).
+#       W&B project and entity (optional overrides; defaults from config are used).
 #
 #   --wandb-tags <comma-separated>
 #       Optional tags list, e.g. "stage1,npmp,debug".
@@ -170,7 +186,7 @@ uv run train-motor-stage1 \
 #   metadata.json (config + dataset summary)
 #   metrics.csv (train/val metrics over time)
 
-# W&B example:
+# W&B example (W&B is mandatory by default):
 # (Assumes WANDB_API_KEY is already set in your environment.)
 uv run train-motor-stage1 \
   --data-root ./data/motor_controller_rollouts/training_dataset1 \
@@ -179,7 +195,6 @@ uv run train-motor-stage1 \
   --chunk-len 32 \
   --k-future 10 \
   --max-iters 200 \
-  --wandb \
   --wandb-project motor_controller_stage1 \
   --wandb-entity <entity> \
   --wandb-tags stage1,npmp,debug
@@ -199,8 +214,7 @@ uv run train-motor-stage1 \
   --run-name final_test_npmp_chunk32_k10_seed0 \
   --beta-kl-end 1e-3 \
   --beta-kl-warmup-iters 2000 \
-  --log-every 50 \
-  --wandb 
+  --log-every 50
 
 
 # ==========================
@@ -258,4 +272,38 @@ uv run play-motor-stage1 \
 #       MJLAB_MOTOR_CONTROLLER_TASK_ID=Mjlab-Tracking-Flat-Booster-T1_23
 
 
+# =============================================================================
+# Goalkeeper Expert E1 (Set & Square) — New API
+# =============================================================================
+# Task id:
+#   Mjlab-GK-Expert-SetSquare-Booster-T1_23
+#
+# Stage-1 decoder source is now W&B-only:
+#   - REQUIRED: stage1_wandb_run_path (entity/project/run_id)
+#   - Provided via env var MJLAB_STAGE1_WANDB_RUN_PATH
+#   - Optional checkpoint selector via MJLAB_STAGE1_CHECKPOINT={best,last,latest}
 
+# 0) Set Stage-1 run (required once per shell)
+export MJLAB_STAGE1_WANDB_RUN_PATH=entity/motor_controller_stage1/run_id
+# optional (default is "best")
+export MJLAB_STAGE1_CHECKPOINT=best
+
+# 1) Quick play sanity (random latent z; check marker + behavior)
+uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
+  --agent random \
+  --num-envs 1 \
+  --viewer native
+
+# 2) Train E1 expert
+# Notes:
+#   - E1 default W&B project is already "goalkeeper_experts" (from task rl_cfg).
+#   - `entity` is the W&B workspace owner (user/team); needed in run paths
+#     like <entity>/<project>/<run_id>, but not required here for training.
+uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
+  --env.scene.num-envs 512
+
+# 3) Play trained E1 policy
+uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
+  --wandb-run-path <entity>/goalkeeper_experts/<run_id> \
+  --num-envs 1 \
+  --viewer native

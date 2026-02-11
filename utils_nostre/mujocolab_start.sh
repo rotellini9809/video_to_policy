@@ -13,7 +13,7 @@ PARENT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WANDB_ENV_FILE="$SCRIPT_DIR/wandb_credentials.env"
 SOURCE_DIR="$PARENT_DIR/mjlab"
 DOCKERFILE_PATH="$SOURCE_DIR/Dockerfile"
-OUTPUTVIDEO_DIR="$PARENT_DIR/human_to_robot/output"
+OUTPUTVIDEO_DIR="$PARENT_DIR/human_to_robot/output/mujoco_csv"
 
 # ---------------- Parse custom flags (same as v2) ----------------
 REBUILD=0
