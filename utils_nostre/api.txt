@@ -107,7 +107,15 @@ HUMAN TO ROBOT
 
 cd /Desktop/SPQR_project_giova_e_simo/mjlab/human_to_robot
 ./scripts/start:human_to_robot.sh
+
+# Single video (from videos[] in config.yaml):
 python video_to_robot.py config.yaml
+
+# Batch from a folder (default: skip already processed videos):
+python batch_generate_poses.py /abs/path/to/video_folder config.yaml
+
+# Batch force rewrite of all videos:
+python batch_generate_poses.py /abs/path/to/video_folder config.yaml --rewrite-all
 
 
 ========================

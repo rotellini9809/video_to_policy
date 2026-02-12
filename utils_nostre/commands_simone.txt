@@ -1,16 +1,6 @@
 # mjlab – Commands & Options
 # --------------------------
 
-# ==========================
-# Portiere env viewer (manual)
-# ==========================
-# Purpose:
-#   Quick visualization of the RoboCup portiere environment with a zero policy.
-#
-# Command:
-uv run python -m mjlab.scripts.view_portiere
-
-
 # =============================================================================
 # Stage‑1 Motor Controller
 # =============================================================================
