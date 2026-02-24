@@ -80,25 +80,25 @@ uv run src/mjlab/scripts/csv_to_npz.py \
 # --output-name is optional; if omitted it uses the CSV filename (stem).
 # Rendering is ON by default; add `--no-render` to skip video generation/logging.
 uv run src/mjlab/scripts/csv_to_npz_booster_t1_23dof.py \
-  --input-file human_to_robot_output/mujoco_csv/booster_t1/my_motion.csv \
+  --input-file human_to_robot_output/booster_t1/my_motion.csv \
   --input-fps 30 \
   --output-fps 50
 
 # Booster T1 23 dof (batch from folder):
 # Processes all *.csv recursively and uploads only names not already present on W&B.
 uv run src/mjlab/scripts/csv_to_npz_booster_t1_23dof.py \
-  --root-dir human_to_robot_output/mujoco_csv/booster_t1 \
+  --root-dir human_to_robot_output/booster_t1 \
   --input-fps 30 \
   --output-fps 50
 
 # Mirror Booster T1 CSV (single file):
 uv run src/mjlab/scripts/mirror_csv_booster_t1_23dof.py \
-  --input-file human_to_robot_output/mujoco_csv/booster_t1/my_motion.csv
+  --input-file human_to_robot_output/booster_t1/my_motion.csv
 
 # Mirror Booster T1 CSV (batch folder):
 # Creates *_mirror.csv for each file (skips existing outputs unless --overwrite).
 uv run src/mjlab/scripts/mirror_csv_booster_t1_23dof.py \
-  --root-dir human_to_robot_output/mujoco_csv/booster_t1
+  --root-dir human_to_robot_output/booster_t1
 
 
 ========================
@@ -112,10 +112,11 @@ cd /Desktop/SPQR_project_giova_e_simo/mjlab/human_to_robot
 python video_to_robot.py config.yaml --rewrite
 
 # Batch from a folder (default: skip already processed videos):
-python batch_generate_poses.py /abs/path/to/video_folder config.yaml
+python batch_video_to_robot.py /abs/path/to/video_folder config.yaml
 
 # Batch force rewrite of all videos:
-python batch_generate_poses.py /abs/path/to/video_folder config.yaml --rewrite
+python batch_video_to_robot.py /abs/path/to/video_folder config.yaml --rewrite
+# --rewrite regenerates known generated artifacts, but does not wipe arbitrary extra files.
 
 
 ========================

@@ -14,6 +14,8 @@ WANDB_ENV_FILE="$SCRIPT_DIR/wandb_credentials.env"
 SOURCE_DIR="$PARENT_DIR/mjlab"
 DOCKERFILE_PATH="$SOURCE_DIR/Dockerfile"
 OUTPUTVIDEO_DIR="$PARENT_DIR/human_to_robot/output/mujoco_csv"
+WANDB_CACHE_HOST_DIR="$SOURCE_DIR/logs/wandb_cache"
+WANDB_CACHE_CONTAINER_DIR="/app/logs/wandb_cache"
 
 # ---------------- Parse custom flags (same as v2) ----------------
 REBUILD=0
@@ -38,6 +40,7 @@ echo "=== Using SOURCE_DIR:      $SOURCE_DIR"
 echo "=== Using DOCKERFILE:      $DOCKERFILE_PATH"
 echo "=== WANDB_ENV_FILE:        $WANDB_ENV_FILE"
 echo "=== OUTPUTVIDEO_DIR(host): $OUTPUTVIDEO_DIR"
+echo "=== WANDB_CACHE_DIR(host): $WANDB_CACHE_HOST_DIR"
 
 # ---------------- Safety checks ----------------
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -123,6 +126,7 @@ echo "Container not found — creating new one."
 "$SCRIPT_DIR"/start_docker.sh \
   --name "$CONTAINER_NAME" \
   "${WANDB_ENV_ARGS[@]}" \
+  --env "WANDB_CACHE_DIR=$WANDB_CACHE_CONTAINER_DIR" \
   --volume "$SOURCE_DIR:/app" \
   --volume "$OUTPUTVIDEO_DIR:/app/human_to_robot_output" \
   --publish 8080:8080 \

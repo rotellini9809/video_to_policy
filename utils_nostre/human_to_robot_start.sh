@@ -67,8 +67,8 @@ if [ "$DEVICE" != "cpu" ] && [ "$DEVICE" != "cuda" ]; then
 fi
 
 # ==================== Names & target ====================
-IMAGE_NAME="human_to_robot_${DEVICE}_v2_prova"
-CONTAINER_NAME="il_prescelto_${DEVICE}_v2_prova"
+IMAGE_NAME="human_to_robot_${DEVICE}"
+CONTAINER_NAME="il_prescelto_${DEVICE}"
 BUILD_TARGET="$DEVICE"
 
 echo "=== Selected device: $DEVICE"
