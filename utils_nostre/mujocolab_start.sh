@@ -3,7 +3,7 @@ echo "START_DOCKER ARGS: $*"
 
 set -e  # Stop on error
 
-IMAGE_NAME="mjlab"
+IMAGE_NAME="mjlab_buttare"
 CONTAINER_NAME="majin_bu"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
