@@ -66,7 +66,8 @@ for artifact in "${artifacts[@]}"; do
     --registry-name "$artifact" \
     --env.scene.num-envs 4096 \
     --agent.num_steps_per_env 25 \
-    --agent.max_iterations 15000
+    --agent.max_iterations 15000 \
+    --agent.run_name "$artifact"
 done
 ```
 
@@ -100,6 +101,17 @@ for run_path in "${rollout_runs[@]}"; do
     --num-envs 64 \
     --output-dir "$DATASET_ROOT"
 done
+```
+
+Batch from W&B workspace/group (no explicit run list):
+
+```bash
+uv run collect-rollouts Mjlab-Tracking-Flat-Booster-T1_23 \
+  --wandb-workspace <entity>/<project> \
+  --wandb-group <group_name> \
+  --num-episodes 200 \
+  --num-envs 64 \
+  --output-dir ./data/motor_controller_rollouts/training_dataset1
 ```
 
 ### 2) Train Stage-1
@@ -158,7 +170,6 @@ uv run eval-motor-stage1 \
 # Render
 uv run play-motor-stage1 \
   --wandb-run-path <entity>/motor_controller_stage1/<run_id> \
-  --checkpoint best
 ```
 
 Useful env vars:
@@ -166,6 +177,16 @@ Useful env vars:
 ```bash
 export MJLAB_MOTOR_CONTROLLER_TASK_ID=Mjlab-Tracking-Flat-Booster-T1_23
 export MJLAB_MOTOR_CONTROLLER_MOTION_FILE=/path/to/motion.npz
+export MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER=<entity>/motor_controller_stage1/<run_id>
+export MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY=<entity>/motor_controller_stage1/<run_id>
+```
+
+If you start MuJoCo with `utils_nostre/mujocolab_start.sh`, set them once in:
+
+```bash
+cp utils_nostre/stage1_expert_paths.env.example utils_nostre/stage1_expert_paths.env
+# then edit utils_nostre/stage1_expert_paths.env with your run ids
+./utils_nostre/mujocolab_start.sh
 ```
 
 ## Push GetUp
@@ -216,4 +237,3 @@ git add mjlab
 git commit -m "Update mjlab submodule"
 git push
 ```
-

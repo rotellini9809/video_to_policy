@@ -11,6 +11,7 @@ PARENT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Paths (same style/behavior as your mjlab_v2 script)
 WANDB_ENV_FILE="$SCRIPT_DIR/wandb_credentials.env"
+EXPERT_ENV_FILE="$SCRIPT_DIR/stage1_expert_paths.env"
 SOURCE_DIR="$PARENT_DIR/mjlab"
 DOCKERFILE_PATH="$SOURCE_DIR/Dockerfile"
 OUTPUTVIDEO_DIR="$PARENT_DIR/human_to_robot/output/mujoco_csv"
@@ -39,6 +40,7 @@ fi
 echo "=== Using SOURCE_DIR:      $SOURCE_DIR"
 echo "=== Using DOCKERFILE:      $DOCKERFILE_PATH"
 echo "=== WANDB_ENV_FILE:        $WANDB_ENV_FILE"
+echo "=== EXPERT_ENV_FILE:       $EXPERT_ENV_FILE"
 echo "=== OUTPUTVIDEO_DIR(host): $OUTPUTVIDEO_DIR"
 echo "=== WANDB_CACHE_DIR(host): $WANDB_CACHE_HOST_DIR"
 
@@ -77,6 +79,24 @@ else
   WANDB_ENV_ARGS=(--env-file "$WANDB_ENV_FILE")
 fi
 
+# Expert Stage-1 run-path envs:
+#   MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER
+#   MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY
+if [ ! -f "$EXPERT_ENV_FILE" ]; then
+  echo "⚠ WARNING: Expert env file not found: $EXPERT_ENV_FILE"
+  echo "   Create it from stage1_expert_paths.env.example to configure local Stage-1 defaults."
+  EXPERT_ENV_ARGS=()
+  STAGE1_ENV_HASH="none"
+else
+  EXPERT_ENV_ARGS=(--env-file "$EXPERT_ENV_FILE")
+  STAGE1_ENV_CANONICAL="$(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "$EXPERT_ENV_FILE" || true)"
+  if [ -n "$STAGE1_ENV_CANONICAL" ]; then
+    STAGE1_ENV_HASH="$(printf '%s\n' "$STAGE1_ENV_CANONICAL" | sha256sum | awk '{print $1}')"
+  else
+    STAGE1_ENV_HASH="empty"
+  fi
+fi
+
 # ---------------- Build image if needed ----------------
 echo "=== Checking for Docker image '$IMAGE_NAME' ==="
 
@@ -106,26 +126,39 @@ fi
 
 # ---------------- Run or start container ----------------
 echo "=== Checking for container '$CONTAINER_NAME' ==="
+LABEL_KEY_STAGE1_ENV_HASH="com.mjlab.stage1_env_hash"
 
 if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
   if [ "$REBUILD" -eq 1 ]; then
     echo "Rebuild requested — recreating container."
     docker rm -f "$CONTAINER_NAME"
   else
-    echo "Container exists. Starting..."
-    docker start "$CONTAINER_NAME"
-    if [ -t 1 ]; then
-      docker attach "$CONTAINER_NAME"
+    CURRENT_STAGE1_ENV_HASH="$(
+      docker inspect -f "{{ index .Config.Labels \"$LABEL_KEY_STAGE1_ENV_HASH\" }}" \
+        "$CONTAINER_NAME" 2>/dev/null || true
+    )"
+    if [ "$CURRENT_STAGE1_ENV_HASH" != "$STAGE1_ENV_HASH" ]; then
+      echo "Expert Stage-1 env changed (container='$CURRENT_STAGE1_ENV_HASH', local='$STAGE1_ENV_HASH')."
+      echo "Recreating container to apply updated Stage-1 run paths."
+      docker rm -f "$CONTAINER_NAME"
+    else
+      echo "Container exists. Starting..."
+      docker start "$CONTAINER_NAME"
+      if [ -t 1 ]; then
+        docker attach "$CONTAINER_NAME"
+      fi
+      exit 0
     fi
-    exit 0
   fi
 fi
 
 echo "Container not found — creating new one."
 
 "$SCRIPT_DIR"/start_docker.sh \
+  --label "$LABEL_KEY_STAGE1_ENV_HASH=$STAGE1_ENV_HASH" \
   --name "$CONTAINER_NAME" \
   "${WANDB_ENV_ARGS[@]}" \
+  "${EXPERT_ENV_ARGS[@]}" \
   --env "WANDB_CACHE_DIR=$WANDB_CACHE_CONTAINER_DIR" \
   --volume "$SOURCE_DIR:/app" \
   --volume "$OUTPUTVIDEO_DIR:/app/human_to_robot_output" \
