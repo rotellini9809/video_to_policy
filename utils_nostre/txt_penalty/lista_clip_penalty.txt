@@ -1,0 +1,31 @@
+🎥 Lista Clip – Penalty / Kicking Motions (optional Stage‑1 enrichment)
+
+Se vuoi migliorare la qualità del rigore (kick più pulito, run-up più stabile), puoi aggiungere motion clip specifiche nel dataset Stage‑1.
+
+🎬 Durata consigliata
+- 3–5 secondi per run-up + kick + follow-through
+- 5–7 secondi solo se includi recovery (es. scivolata → recupero)
+
+✅ Regola d’oro
+Ogni clip deve contenere almeno UNA transizione chiara:
+- fermo → 2 passi → calcio
+- passo → calcio → stop
+
+🟢 Kick (minimo utile)
+1) Calcio destro (approccio corto)
+2) Calcio sinistro (approccio corto)
+3) Calcio destro (approccio 2–3 passi)
+4) Calcio sinistro (approccio 2–3 passi)
+5) Plant foot stabile (piede d’appoggio) + kick
+
+🟡 Varianti che aumentano generalizzazione
+- run-up leggermente diagonale (±10–15°)
+- kick con corpo più alto (no crouch eccessivo)
+- follow-through controllato (evita rotazioni del tronco)
+
+🔴 Da evitare all’inizio
+- combo lunghissime con 2 calci
+- movimenti con collisioni strane / scivolate incontrollate
+
+📌 Nota
+Anche se l’expert penalty usa Stage‑1 frozen, un Stage‑1 con buoni kick rende la policy più facile da addestrare e più precisa.

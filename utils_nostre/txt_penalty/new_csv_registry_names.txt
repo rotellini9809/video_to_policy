@@ -1,0 +1,10 @@
+# Penalty motion registries (optional)
+#
+# Same idea as txt_goalkeeper/new_csv_registry_names.txt, but for striker/kick motions.
+# Put one W&B artifact path per line.
+# Example format:
+#   <entity>/<registry>/<artifact_name>
+#
+# Example:
+#   fratelligpt-sapienza-universit-di-roma-org/wandb-registry-motions/kick_right_1_t1_23_motion
+#   fratelligpt-sapienza-universit-di-roma-org/wandb-registry-motions/kick_left_1_t1_23_motion
