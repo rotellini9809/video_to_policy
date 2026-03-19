@@ -3,8 +3,8 @@ echo "START_DOCKER ARGS: $*"
 
 set -e  # Stop on error
 
-IMAGE_NAME="mjlab"
-CONTAINER_NAME="majin_bu"
+IMAGE_NAME="mjlab_v1"
+CONTAINER_NAME="majin_bu_v1"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PARENT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"

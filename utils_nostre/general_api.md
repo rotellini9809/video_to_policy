@@ -224,7 +224,7 @@ python batch_video_to_robot.py /abs/path/to/video_folder config.yaml --rewrite
 # Inside mjlab: always work on main
 cd mjlab
 git switch main
-git pull --ff-only
+git pull --recurse-submodules
 
 # Commit/push mjlab
 git add .
