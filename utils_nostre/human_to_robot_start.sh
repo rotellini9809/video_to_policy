@@ -97,7 +97,7 @@ fi
 
 RUN_CMD=()
 if [ "$RUN_MODE" = "run" ]; then
-  RUN_CMD=(python /workspace/video_to_robot.py /workspace/config.yaml)
+  RUN_CMD=(python /workspace/video_to_robot.py /workspace/input_video --config /workspace/config.yaml)
 fi
 
 DISPLAY_VALUE="${DISPLAY:-}"
@@ -105,13 +105,7 @@ X11_ENABLED="off"
 if [ -n "$DISPLAY_VALUE" ]; then
   X11_ENABLED="on"
 fi
-NET_MODE="default"
-if [ -n "$DISPLAY_VALUE" ]; then
-  DOCKER_ROOT_DIR="$(docker info --format '{{.DockerRootDir}}' 2>/dev/null || true)"
-  if echo "$DOCKER_ROOT_DIR" | grep -q "/var/snap/docker"; then
-    NET_MODE="host"
-  fi
-fi
+NET_MODE="bridge"
 
 # Warn about viewer when DISPLAY is missing
 SHOW_VIEWER="$(grep -E '^[[:space:]]*show_viewer[[:space:]]*:' "$CONFIG_PATH" \
@@ -198,9 +192,9 @@ EXTRA_ARGS=()
   --label "$LABEL_KEY_X11=$X11_ENABLED" \
   --label "$LABEL_KEY_DISPLAY=$DISPLAY_VALUE" \
   --label "$LABEL_KEY_NET=$NET_MODE" \
+  --network "$NET_MODE" \
   --name "$CONTAINER_NAME" \
   --volume "$SOURCE_DIR:/workspace" \
-  --publish 8080:8080 \
   $INTERACTIVE \
   "$IMAGE_NAME" \
   "${RUN_CMD[@]}" \

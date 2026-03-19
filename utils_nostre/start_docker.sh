@@ -39,9 +39,14 @@ DOCKER_COMMAND="docker run --runtime=nvidia --gpus all"
 
 
 DOCKER_NETWORK_ARGS="--net host"
-if [[ "$@" == *"--net "* ]]; then
-    DOCKER_NETWORK_ARGS=""
-fi
+for arg in "$@"; do
+    case "$arg" in
+        --net|--net=*|--network|--network=*|--publish|--publish=*|-p)
+            DOCKER_NETWORK_ARGS=""
+            break
+            ;;
+    esac
+done
 
 xhost +
 
@@ -54,7 +59,6 @@ $DOCKER_NETWORK_ARGS \
 -v "$HOME/exchange:/home/user/exchange" \
 -v /var/run/docker.sock:/var/run/docker.sock \
 "$@"
-
 
 
 

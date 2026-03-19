@@ -1,0 +1,121 @@
+2026-02-20_15-04-10_granchio_4_t1_23_motion -> o9yagdxk
+
+granchio_short_2_t1_23_motion -> syph8reg
+granchio_short_1_t1_23_motion -> qxxgxnb7
+
+2026-03-06_14-23-20_rotazione_steps_1_t1_23_motion -> ozskmkcc
+2026-03-06_12-29-59_rotazione_steps_2_t1_23_motion -> v2nwg1m8
+2026-03-06_07-22-38_rotazione_steps_5_t1_23_motion -> tii7d0rs
+2026-03-06_05-40-32_rotazione_steps_6_t1_23_motion -> nqaivenk
+2026-03-06_03-58-58_rotazione_steps_7_t1_23_motion -> er75lk2x
+2026-03-06_02-16-41_rotazione_steps_8_t1_23_motion -> 1bfwf2ce
+2026-03-04_12-45-08_rotazione_steps_9_t1_23_motion -> 2fpat7jv
+rotazione_steps_10_t1_23_motion_2 -> 1md04gzo
+rotazione_steps_11_t1_23_motion_2 -> ea9x2j69
+
+crouch_stance_1_t1_23_motion -> k0zgfxdw
+crouch_stance_1_t1_23_motion_mirror -> jb39mt8m
+crouch_stance_2_t1_23_motion -> 2cq7t122
+
+airone_1_t1_23_motion -> qdqrs4sm
+airone_2_t1_23_motion -> yfos6869
+airone_3_t1_23_motion -> jidtc2ij
+airone_1_t1_23_motion_mirror -> jk6il35b
+airone_2_t1_23_motion_mirror -> qljvuf1x
+airone_3_t1_23_motion_mirror -> jg4goerk
+
+allungo_piede_1_t1_23_motion -> mlwx9f4i
+allungo_piede_2_t1_23_motion -> 2f0x1jhy
+allungo_piede_3_t1_23_motion -> ge2tpdfw
+allungo_piede_4_t1_23_motion -> 6wy25oju
+
+parata_mani_1_t1_23_motion -> e465wine
+parata_mani_2_t1_23_motion -> 4wbufi92
+parata_mani_3_t1_23_motion -> vnpmx6d8
+parata_mani_4_t1_23_motion -> ci3fr3t1
+
+rimando_pugno_1_t1_23_motion -> vnxzdg55
+rimando_pugno_2_t1_23_motion -> gx4q6h7n
+rimando_pugno_3_t1_23_motion -> 388rmfrk
+rimando_pugno_4_t1_23_motion -> qqa2sci8
+rimando_pugno_5_t1_23_motion -> iu958b17
+rimando_pugno_6_t1_23_motion -> ntmt97r6
+rimando_pugno_7_t1_23_motion -> 33ran76v
+
+rilancio_calcio_1_t1_23_motion -> 1irz53kt
+rilancio_calcio_2_t1_23_motion -> 7ik598hy
+rilancio_calcio_3_t1_23_motion -> m538y5hx
+rilancio_calcio_1_t1_23_motion_mirror -> wpoz743h
+rilancio_calcio_2_t1_23_motion_mirror -> 6nuthub7
+rilancio_calcio_3_t1_23_motion_mirror -> xx4u52iv
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rimosse per ora
+
+granchio_ubriaco_1_t1_23_motion -> i5n0rxpq
+granchio_ubriaco_2_t1_23_motion -> xbfwuxve
+camminata_rotazione_1_t1_23_motion -> prnxi3cp
+granchio_1_t1_23_motion_mirror -> cxb1p36g
+granchio_2_t1_23_motion_mirror -> zlz122q8
+granchio_3_t1_23_motion_mirror -> mj9o3t1x
+granchio_4_t1_23_motion_mirror -> lc0ukzke
+granchio_2_t1_23_motion -> fak9tuib
+perdita_equilibrio_2_t1_23_motion_mirror -> o88o2wf4
+perdita_equilibrio_1_t1_23_motion_mirror -> 28tq5rhh
+perdita_equilibrio_3_t1_23_motion_mirror -> 4f93x3vp
+scatti_1_t1_23_motion -> 8tz9tzzf
+scatti_2_t1_23_motion -> ke8uqb81
+scatti_3_t1_23_motion -> li9bzues
+scatti_4_t1_23_motion -> 2p3sc3h2
+scatti_5_t1_23_motion -> t33294z9
+scatti_6_t1_23_motion -> ii0xl3al
+scatti_8_t1_23_motion -> okvahk4z
+rimando_pugno_1_t1_23_motion_mirror -> mvvy2bjz
+rimando_pugno_2_t1_23_motion_mirror -> dq8j0hsh
+rimando_pugno_3_t1_23_motion_mirror -> 4t86rxwi
+rimando_pugno_4_t1_23_motion_mirror -> khw8doip
+rimando_pugno_5_t1_23_motion_mirror -> b123in80
+rimando_pugno_6_t1_23_motion_mirror -> he2u2v36
+rimando_pugno_7_t1_23_motion_mirror -> 8gydh2fe
+spostamento_equilibrio_ubriaco_1_t1_23_motion -> mlqb6um2
+2026-03-04_14-12-54_rotazione_steps_9_t1_23_motion_mirror -> 658td955
+
+
+saltelli_1_t1_23_motion -> 74873bpe
+saltelli_2_t1_23_motion -> k6bi372m
+spostamento_equilibrio_1_t1_23_motion -> tee2c2nx
+2026-02-21_07-58-34_perdita_equilibrio_1_t1_23_motion -> qtagrize
+2026-02-21_13-46-01_perdita_equilibrio_2_t1_23_motion -> 0a6egd9q
+2026-02-21_19-26-54_perdita_equilibrio_3_t1_23_motion -> c6zr0rz3
+
+spostamento_equilibrio_2_t1_23_motion -> uisuzzu1
+spostamento_equilibrio_3_t1_23_motion -> hx7b24sr
+spostamento_equilibrio_4_t1_23_motion -> wd8yyf49
+spostamento_equilibrio_ubriaco_2_t1_23_motion -> ai90q32s
+
+
+2026-03-06_10-47-13_rotazione_steps_3_t1_23_motion -> 5ppa0ze7
+2026-03-06_09-04-30_rotazione_steps_4_t1_23_motion -> py9pkjhb
+
+
+parata_mani_1_t1_23_motion_mirror -> ld5ht4ay
+parata_mani_2_t1_23_motion_mirror -> cgvmrchc
+parata_mani_3_t1_23_motion_mirror -> axneo079
+parata_mani_4_t1_23_motion_mirror -> 9erku9l0
+
+
+2026-02-20_12-17-21_granchio_3_t1_23_motion -> zqtg0gnh
