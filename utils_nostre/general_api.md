@@ -125,7 +125,7 @@ uv run train-motor-stage1 \
   --sample-mode chunk \
   --chunk-len 32 \
   --k-future 10 \
-  --max-iters 5000 \
+  --max-iters 20000 \
   --val-frac 0.1 \
   --seed 0 \
   --run-name final_test_npmp_chunk32_k10_seed0 \

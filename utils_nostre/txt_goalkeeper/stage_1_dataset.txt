@@ -7,12 +7,12 @@ granchio_short_1_t1_23_motion -> qxxgxnb7
 
 2026-03-06_14-23-20_rotazione_steps_1_t1_23_motion -> ozskmkcc
 2026-03-06_12-29-59_rotazione_steps_2_t1_23_motion -> v2nwg1m8
+2026-03-06_03-58-58_rotazione_steps_7_t1_23_motion -> er75lk2x
+
 2026-03-06_07-22-38_rotazione_steps_5_t1_23_motion -> tii7d0rs
 2026-03-06_05-40-32_rotazione_steps_6_t1_23_motion -> nqaivenk
-2026-03-06_03-58-58_rotazione_steps_7_t1_23_motion -> er75lk2x
-2026-03-06_02-16-41_rotazione_steps_8_t1_23_motion -> 1bfwf2ce
+
 2026-03-04_12-45-08_rotazione_steps_9_t1_23_motion -> 2fpat7jv
-rotazione_steps_10_t1_23_motion_2 -> 1md04gzo
 rotazione_steps_11_t1_23_motion_2 -> ea9x2j69
 
 crouch_stance_1_t1_23_motion -> k0zgfxdw
@@ -50,9 +50,6 @@ rilancio_calcio_3_t1_23_motion -> m538y5hx
 rilancio_calcio_1_t1_23_motion_mirror -> wpoz743h
 rilancio_calcio_2_t1_23_motion_mirror -> 6nuthub7
 rilancio_calcio_3_t1_23_motion_mirror -> xx4u52iv
-
-
-last image runs paths
 
 rotazione_sul_posto_2_t1_23_motion_mirror:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/2bd3sdr2
 rotazione_sul_posto_2_t1_23_motion:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/43gf1b3t
@@ -117,14 +114,13 @@ spostamento_equilibrio_3_t1_23_motion -> hx7b24sr
 spostamento_equilibrio_4_t1_23_motion -> wd8yyf49
 spostamento_equilibrio_ubriaco_2_t1_23_motion -> ai90q32s
 
-
-2026-03-06_10-47-13_rotazione_steps_3_t1_23_motion -> 5ppa0ze7
-2026-03-06_09-04-30_rotazione_steps_4_t1_23_motion -> py9pkjhb
-
-
 parata_mani_1_t1_23_motion_mirror -> ld5ht4ay
 parata_mani_2_t1_23_motion_mirror -> cgvmrchc
 parata_mani_3_t1_23_motion_mirror -> axneo079
 parata_mani_4_t1_23_motion_mirror -> 9erku9l0
 
 
+2026-03-06_02-16-41_rotazione_steps_8_t1_23_motion -> 1bfwf2ce
+rotazione_steps_10_t1_23_motion_2 -> 1md04gzo
+2026-03-06_10-47-13_rotazione_steps_3_t1_23_motion -> 5ppa0ze7
+2026-03-06_09-04-30_rotazione_steps_4_t1_23_motion -> py9pkjhb

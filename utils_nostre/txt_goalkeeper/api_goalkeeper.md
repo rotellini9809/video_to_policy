@@ -42,7 +42,7 @@ Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4>` to select the E1 curriculum stag
 
 ```bash
 uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
-  --viewer native \
+  --viewer viser \
   --wandb-run-path "$ENTITY/goalkeeper_experts/<run_id>" 
 ```
 
