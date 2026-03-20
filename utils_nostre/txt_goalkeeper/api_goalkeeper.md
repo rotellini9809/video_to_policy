@@ -31,11 +31,13 @@ uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
 ### Train
 
 ```bash
+MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
 uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
   --env.scene.num-envs 512 \
   --agent.max_iterations 20000
 ```
 
+Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4>` to select the E1 curriculum stage for that run.
 ### Play trained policy
 
 ```bash
@@ -95,7 +97,7 @@ uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
 MJLAB_E2_RESET_CURRICULUM_STAGE=1
 uv run play Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
   --num-envs 1 \
-  --viewer viser
+  --viewer viser \
   --wandb-run-path "$ENTITY/goalkeeper_experts/<run_id>" 
 ```
 
