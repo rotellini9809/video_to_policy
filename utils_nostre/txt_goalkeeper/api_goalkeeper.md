@@ -92,8 +92,10 @@ uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
 ### Play trained policy
 
 ```bash
+MJLAB_E2_RESET_CURRICULUM_STAGE=1
 uv run play Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
   --num-envs 1 \
+  --viewer viser
   --wandb-run-path "$ENTITY/goalkeeper_experts/<run_id>" 
 ```
 

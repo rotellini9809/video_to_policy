@@ -1,4 +1,6 @@
 2026-02-20_15-04-10_granchio_4_t1_23_motion -> o9yagdxk
+2026-02-20_12-17-21_granchio_3_t1_23_motion -> zqtg0gnh
+granchio_3_t1_23_motion_mirror -> mj9o3t1x
 
 granchio_short_2_t1_23_motion -> syph8reg
 granchio_short_1_t1_23_motion -> qxxgxnb7
@@ -50,7 +52,16 @@ rilancio_calcio_2_t1_23_motion_mirror -> 6nuthub7
 rilancio_calcio_3_t1_23_motion_mirror -> xx4u52iv
 
 
+last image runs paths
 
+rotazione_sul_posto_2_t1_23_motion_mirror:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/2bd3sdr2
+rotazione_sul_posto_2_t1_23_motion:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/43gf1b3t
+rotazione_sul_posto_1_t1_23_motion_mirror:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/2i399y78
+rotazione_sul_posto_1_t1_23_motion:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/o0b8tirz
+camminata_indietro_t1_23_motion_mirror:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/blosl3a9
+camminata_indietro_t1_23_motion:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/5ifa8gb3
+camminata_avanti_t1_23_motion_mirror:v0 -> fratelligpt-sapienza-universit-di-roma/mjlab/d5ttibsu
+camminata_avanti_t1_23_motion -> fratelligpt-sapienza-universit-di-roma/mjlab/2w5dfv7z
 
 
 
@@ -71,7 +82,6 @@ granchio_ubriaco_2_t1_23_motion -> xbfwuxve
 camminata_rotazione_1_t1_23_motion -> prnxi3cp
 granchio_1_t1_23_motion_mirror -> cxb1p36g
 granchio_2_t1_23_motion_mirror -> zlz122q8
-granchio_3_t1_23_motion_mirror -> mj9o3t1x
 granchio_4_t1_23_motion_mirror -> lc0ukzke
 granchio_2_t1_23_motion -> fak9tuib
 perdita_equilibrio_2_t1_23_motion_mirror -> o88o2wf4
@@ -118,4 +128,3 @@ parata_mani_3_t1_23_motion_mirror -> axneo079
 parata_mani_4_t1_23_motion_mirror -> 9erku9l0
 
 
-2026-02-20_12-17-21_granchio_3_t1_23_motion -> zqtg0gnh

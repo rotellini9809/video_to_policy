@@ -13,7 +13,7 @@ Per RL step, the environment reward is:
 
 Current configured reward-rate expression:
 
-`R_rate = -300*goal_conceded + 120*save_success + 40*deflect_away - 1.6*low_height_soft_penalty + 1.0*upright - 60*fallen`
+`R_rate = -300*goal_conceded - 0.008*action_rate_l2 + 120*save_success + 40*deflect_away - 1.6*low_height_soft_penalty - 0.5*joint_pos_limits + 1.0*upright - 60*fallen`
 
 Current E2 timing:
 - `SIM_TIMESTEP_S = 0.005`
@@ -60,7 +60,19 @@ Raw term:
 Effect:
 - Gives sparse success credit at the end of the fixed post-contact resolution window.
 
-### 2.3 `deflect_away` (weight `+40`)
+### 2.3 `action_rate_l2` (weight `-0.008`)
+Function:
+- `action_rate_l2(command_name="stand_block")`
+
+Raw term:
+- base raw is `sum((action_t - action_{t-1})^2)` over the policy action vector
+- implemented through the generic MDP reward helper
+- current E2 wrapper applies an all-ones reward-active mask, so the term is effectively always on
+
+Effect:
+- Penalizes abrupt action changes and smooths the stand-block response.
+
+### 2.4 `deflect_away` (weight `+40`)
 Function:
 - `deflect_away_from_goal_reward(..., only_on_first_contact=True)`
 
@@ -73,7 +85,7 @@ Raw term:
 Effect:
 - Rewards redirection quality at the first block contact.
 
-### 2.4 `low_height_soft_penalty` (weight `-1.6`)
+### 2.5 `low_height_soft_penalty` (weight `-1.6`)
 Function:
 - `low_height_soft_penalty(h_soft=0.48)`
 
@@ -85,7 +97,19 @@ Raw term:
 Effect:
 - Penalizes crouching/collapse before the hard fallen condition triggers.
 
-### 2.5 `upright` (weight `+1.0`)
+### 2.6 `joint_pos_limits` (weight `-0.5`)
+Function:
+- `joint_pos_limits(asset_cfg=SceneEntityCfg("robot", joint_names=(".*",)), command_name="stand_block")`
+
+Raw term:
+- uses the generic soft joint-limit penalty over all robot joints
+- for each joint, accumulates violation beyond the configured soft lower/upper position limits
+- current E2 wrapper applies an all-ones reward-active mask, so the term is effectively always on
+
+Effect:
+- Discourages using joint-end-range postures while blocking.
+
+### 2.7 `upright` (weight `+1.0`)
 Function:
 - `upright_stability_reward`
 
@@ -102,7 +126,7 @@ Raw term:
 Effect:
 - Rewards upright trunk posture continuously.
 
-### 2.6 `fallen` (weight `-60`)
+### 2.8 `fallen` (weight `-60`)
 Function:
 - `fallen_indicator(min_height=0.32, max_tilt=1.25)` via config override
 
@@ -128,7 +152,7 @@ Not currently configured:
 - First keeper-ball contact is detected by sensor `ball_robot_contact`
 - sensor match is ball geom `soccer_ball/ball_collision` vs robot subtree `Trunk`
 - `t_contact` is latched once per env and then not overwritten
-- termination fires when `t_now - t_contact >= 0.8 s`
+- termination fires when `t_now - t_contact >= 1.5 s`
 - on reset, `t_contact` is restored to unset
 - goal termination remains separate and immediate
 
@@ -173,12 +197,13 @@ Removed from current implementation:
 - sim `dt = 0.005 s`
 - control decimation is `4`
 - RL step `step_dt = 0.02 s`
-- resolution window is `0.8 s` and is quantized at step resolution
+- resolution window is `1.5 s` and is quantized at step resolution
 
 ## 7) Practical Reading of Current Reward Design
 
 1. E2 is dominated by sparse outcome events: large fail (`goal_conceded`) and large success (`save_success`).
 2. First-contact mechanics are explicitly incentivized through `deflect_away`, not long-horizon ball interaction.
 3. Stability is shaped both continuously (`upright`) and through the standing gate on sparse task rewards, using the same posture target.
-4. Area violations are no longer part of the reward or termination logic.
-5. Collapse is discouraged by both `low_height_soft_penalty` and `fallen`.
+4. Action smoothness and joint-end-range usage are now explicitly regularized through `action_rate_l2` and `joint_pos_limits`.
+5. Area violations are no longer part of the reward or termination logic.
+6. Collapse is discouraged by both `low_height_soft_penalty` and `fallen`.
