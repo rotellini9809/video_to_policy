@@ -14,6 +14,23 @@ export MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER="$ENTITY/motor_controller_stage1/$
 export MJLAB_STAGE1_CHECKPOINT=best
 ```
 
+## Resume Existing Run
+
+Resume from W&B:
+
+```bash
+# E1
+MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4> \
+uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
+  --agent.resume True \
+  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" \
+  --wandb-checkpoint-name best
+```
+
+Notes:
+- `--wandb-checkpoint-name` accepts `latest`, `best`, `last`, or a concrete file such as `model_5000.pt`.
+- For E1 and E2, the curriculum stage is still controlled by `MJLAB_E1_RESET_CURRICULUM_STAGE` / `MJLAB_E2_RESET_CURRICULUM_STAGE` on the resumed launch.
+
 ## E1 - SetSquare
 
 Task ID: `Mjlab-GK-Expert-SetSquare-Booster-T1_23`
@@ -34,7 +51,7 @@ uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
 MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
 uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
   --env.scene.num-envs 512 \
-  --agent.max_iterations 20000
+  --agent.max_iterations 5000
 ```
 
 Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4>` to select the E1 curriculum stage for that run.
@@ -65,7 +82,7 @@ uv run play Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
 ```bash
 uv run train Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
   --env.scene.num-envs 4096 \
-  --agent.max_iterations 500
+  --agent.max_iterations 5000
 ```
 
 ### E2 curriculum helper
@@ -76,7 +93,7 @@ Start from stage 1:
 uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
   --current-stage 1 \
   --num-envs 4096 \
-  --train-iterations-per-stage 500 \
+  --train-iterations-per-stage 5000 \
   --execute
 ```
 
@@ -86,7 +103,7 @@ Start from a previous W&B run:
 uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
   --current-stage 1 \
   --num-envs 4096 \
-  --train-iterations-per-stage 500 \
+  --train-iterations-per-stage 5000 \
   --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<old_run_id>" \
   --execute
 ```
