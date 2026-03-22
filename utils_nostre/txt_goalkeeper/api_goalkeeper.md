@@ -43,7 +43,7 @@ Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4>` to select the E1 curriculum stag
 ```bash
 uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
   --viewer viser \
-  --wandb-run-path "$ENTITY/goalkeeper_experts/<run_id>" 
+  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" 
 ```
 
 ## E2 - StandBlock
@@ -87,7 +87,7 @@ uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
   --current-stage 1 \
   --num-envs 4096 \
   --train-iterations-per-stage 500 \
-  --wandb-run-path "$ENTITY/goalkeeper_experts/<old_run_id>" \
+  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<old_run_id>" \
   --execute
 ```
 
@@ -98,7 +98,7 @@ MJLAB_E2_RESET_CURRICULUM_STAGE=1
 uv run play Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
   --num-envs 1 \
   --viewer viser \
-  --wandb-run-path "$ENTITY/goalkeeper_experts/<run_id>" 
+  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<run_id>" 
 ```
 
 ### Launcher validation
@@ -136,5 +136,5 @@ uv run train Mjlab-GK-Expert-ClearAway-Booster-T1_23 \
 ```bash
 uv run play Mjlab-GK-Expert-ClearAway-Booster-T1_23 \
   --num-envs 1 \
-  --wandb-run-path "$ENTITY/goalkeeper_experts/<run_id>" 
+  --wandb-run-path "$ENTITY/e3_goalkeeper_expert/<run_id>" 
 ```
