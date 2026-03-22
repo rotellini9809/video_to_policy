@@ -50,24 +50,63 @@ Ball-curb contact handling:
 Important:
 - Wall geoms are still default colliders (no global ball-only `contype/conaffinity` filtering on the walls themselves). The ball-only behavior is enforced for launcher logic via the dedicated contact sensor.
 
-## 4) Keeper Spawn
+## 4) Keeper Spawn and Reset Curriculum
 
-Keeper spawn ranges:
-- `x in [6.8, 7.2]`
-- `y in [-0.6, 0.6]`
+Keeper and ball randomization are now driven by the E1 reset curriculum (`E1_RESET_STAGE_CFGS`), not by a single fixed spawn box.
+
+Current selection behavior:
+- training default stage: `4`
+- override via env var: `MJLAB_E1_RESET_CURRICULUM_STAGE`
+- play path can recover the saved stage from the checkpoint / W&B run metadata
+
+## 4.1 Curriculum Randomization Stats
+
+Stage 1:
+- keeper `x ~ U(6.67, 6.83)`
+- keeper `y ~ U([-1.0, -0.2] U [0.2, 1.0])`
+- keeper yaw offset `~ U(-20deg, +20deg)`
+- ball forward `~ U(4.0, 6.0)`
+- ball lateral `~ U([-1.2, -0.5] U [0.5, 1.2])`
+- launcher mode probs: dead `100%`, lateral `0%`, dribble `0%`
+
+Stage 2:
+- keeper `x ~ U(6.63, 6.87)`
+- keeper `y ~ U([-1.0, -0.2] U [0.2, 1.0])`
+- keeper yaw offset `~ U(-35deg, +35deg)`
+- ball forward `~ U(3.5, 7.5)`
+- ball lateral `~ U([-2.0, -0.30] U [0.30, 2.0])`
+- launcher mode probs: dead `80%`, lateral `20%`, dribble `0%`
+
+Stage 3:
+- keeper `x ~ U(6.60, 6.90)`
+- keeper `y ~ U([-1.0, -0.2] U [0.2, 1.0])`
+- keeper yaw offset `~ U(-55deg, +55deg)`
+- ball forward `~ U(3.0, 9.0)`
+- ball lateral `~ U([-3.0, -0.15] U [0.15, 3.0])`
+- launcher mode probs: dead `60%`, lateral `30%`, dribble `10%`
+
+Stage 4 (current default training stage):
+- keeper `x ~ U(6.60, 6.90)`
+- keeper `y ~ U([-1.0, -0.2] U [0.2, 1.0])`
+- keeper yaw offset `~ U(-55deg, +55deg)`
+- ball forward `~ U(3.0, 11.0)`
+- ball lateral `~ U(-3.8, 3.8)`
+- launcher mode probs: dead `20%`, lateral `50%`, dribble `30%`
 
 ## 5) Ball Spawn Randomization
 
 ## 5.1 XY Spawn
-Ball spawns relative to keeper spawn:
+Ball spawn ranges are stage-dependent; see the curriculum table above.
+
+At stage 4 (default training stage), ball spawns relative to keeper spawn as:
 - `forward ~ U(3.0, 11.0)`
 - `lateral ~ U(-3.8, 3.8)`
 - `ball_x = keeper_x - forward`
 - `ball_y = keeper_y + lateral`
 
-Approx world-frame range:
-- `ball_x in [-4.2, 4.2]`
-- `ball_y in [-4.4, 4.4]`
+Approx world-frame range at stage 4:
+- `ball_x in [-4.4, 3.9]`
+- `ball_y in [-4.8, 4.8]`
 
 ## 5.2 Z Spawn
 Base sampling:
@@ -87,10 +126,11 @@ Mode-dependent override after base spawn:
 
 ## 6) Launcher Mode Probabilities
 
-Top-level split:
-- dead: `40%`
-- lateral: `40%`
-- dribble: `20%` (remainder)
+Top-level split is stage-dependent:
+- stage 1: dead `100%`, lateral `0%`, dribble `0%`
+- stage 2: dead `80%`, lateral `20%`, dribble `0%`
+- stage 3: dead `60%`, lateral `30%`, dribble `10%`
+- stage 4 (default training stage): dead `20%`, lateral `50%`, dribble `30%`
 
 Mode IDs:
 - `0 = dead`
@@ -99,7 +139,7 @@ Mode IDs:
 
 ## 7) Mode Details
 
-## 7.1 Dead Mode (40%)
+## 7.1 Dead Mode
 Inside dead mode:
 - with probability `0.20`, sample a tiny drift kick
 - otherwise remain fully still
@@ -107,15 +147,17 @@ Inside dead mode:
 Drift speed:
 - `0.02 .. 0.10 m/s`
 
-Effective percentages:
-- dead fully still: `40% * 80% = 32%`
-- dead tiny drift: `40% * 20% = 8%`
+Effective percentages are stage-dependent:
+- stage 1: dead fully still `80%`, dead tiny drift `20%`
+- stage 2: dead fully still `64%`, dead tiny drift `16%`
+- stage 3: dead fully still `48%`, dead tiny drift `12%`
+- stage 4: dead fully still `16%`, dead tiny drift `4%`
 
-## 7.2 Lateral Mode (40%)
+## 7.2 Lateral Mode
 - One main kick is always sampled.
 - Main kick is immediate (`kick_time = 0.0`).
 
-## 7.3 Dribble Mode (20%)
+## 7.3 Dribble Mode
 - One main kick immediate at `t=0`.
 - Additional taps are always scheduled.
 

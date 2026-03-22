@@ -129,8 +129,8 @@ uv run train-motor-stage1 \
   --val-frac 0.1 \
   --seed 0 \
   --run-name final_test_npmp_chunk32_k10_seed0 \
-  --beta-kl-end 1e-3 \
-  --beta-kl-warmup-iters 2000 \
+  --beta-kl-end 1e-2 \
+  --beta-kl-warmup-iters 10000 \
   --log-every 50
 ```
 
