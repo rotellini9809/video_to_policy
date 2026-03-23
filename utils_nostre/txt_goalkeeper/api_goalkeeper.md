@@ -20,7 +20,7 @@ Resume from W&B:
 
 ```bash
 # E1
-MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4> \
+MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3> \
 uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
   --agent.resume True \
   --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" \
@@ -50,11 +50,18 @@ uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
 ```bash
 MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
 uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
-  --env.scene.num-envs 512 \
+  --env.scene.num-envs 4096 \
   --agent.max_iterations 5000
+
+
+uv run python src/mjlab/scripts/auto_promote_gk_e1_curriculum.py \
+  --current-stage 1 \
+  --num-envs 4096 \
+  --train-iterations-per-stage 5000 \
+  --execute
 ```
 
-Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3|4>` to select the E1 curriculum stage for that run.
+Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3>` to select the E1 curriculum stage for that run.
 ### Play trained policy
 
 ```bash
