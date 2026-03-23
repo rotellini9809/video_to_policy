@@ -73,6 +73,7 @@ fi
 # W&B env file handling (same behavior as v2)
 if [ ! -f "$WANDB_ENV_FILE" ]; then
   echo "⚠ WARNING: W&B env file not found: $WANDB_ENV_FILE"
+  echo "   Create it manually if you want WANDB_API_KEY loaded automatically."
   echo "   W&B will run without WANDB_API_KEY unless you set it another way."
   WANDB_ENV_ARGS=()
 else
@@ -84,7 +85,7 @@ fi
 #   MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY
 if [ ! -f "$EXPERT_ENV_FILE" ]; then
   echo "⚠ WARNING: Expert env file not found: $EXPERT_ENV_FILE"
-  echo "   Create it from stage1_expert_paths.env.example to configure local Stage-1 defaults."
+  echo "   Create it manually to configure local Stage-1 defaults."
   EXPERT_ENV_ARGS=()
   STAGE1_ENV_HASH="none"
 else

@@ -184,8 +184,15 @@ export MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY=<entity>/motor_controller_stage1/<run
 If you start MuJoCo with `utils_nostre/mujocolab_start.sh`, set them once in:
 
 ```bash
-cp utils_nostre/stage1_expert_paths.env.example utils_nostre/stage1_expert_paths.env
-# then edit utils_nostre/stage1_expert_paths.env with your run ids
+cat > utils_nostre/wandb_credentials.env <<'EOF'
+WANDB_API_KEY=<your_wandb_api_key>
+EOF
+
+cat > utils_nostre/stage1_expert_paths.env <<'EOF'
+MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER=<entity>/motor_controller_stage1/<run_id>
+MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY=<entity>/motor_controller_stage1/<run_id>
+EOF
+
 ./utils_nostre/mujocolab_start.sh
 ```
 
