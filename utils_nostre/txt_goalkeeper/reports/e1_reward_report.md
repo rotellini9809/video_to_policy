@@ -29,8 +29,9 @@ Current `RewardManager` behavior:
 - `Episode_Reward/*` logs are episodic sums divided by `max_episode_length_s`.
 - Terms with weight `0.0` are skipped at compute time.
 
-Current E1 has one zero-weight reward term:
-- `outside_area`
+Current E1 has two zero-weight reward terms:
+- `stance_center_move_toward_home`
+- `yaw_align_waist`
 
 ## 2) E1 Reward Context
 
@@ -59,7 +60,7 @@ Current reset behavior relevant to reward interpretation:
 
 Configured reward-rate expression:
 
-`R_rate = -0.008*action_rate_l2 -0.005*angular_momentum -0.01*body_ang_vel -6.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.2*stance_center_home_x_abs_pen +0.3*stance_center_home_x_progress -0.7*stance_center_home_y_abs_pen +1.0*stance_center_home_y_progress +0.15*stance_center_move_toward_home -0.8*stance_ortho_abs_pen +1.0*stance_ortho_progress -0.25*stance_width_band_pen +1.0*upright +0.1*yaw_align_waist -0.1*yaw_err_abs_pen +0.2*yaw_progress`
+`R_rate = -0.008*action_rate_l2 -0.005*angular_momentum -0.01*body_ang_vel -6.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.2*stance_center_home_x_abs_pen +0.3*stance_center_home_x_progress -0.7*stance_center_home_y_abs_pen +1.0*stance_center_home_y_progress +0.0*stance_center_move_toward_home -0.8*stance_ortho_abs_pen +1.0*stance_ortho_progress -0.3*stance_width_band_pen +0.15*pelvis_between_feet +1.0*upright -0.05*waist_ready_twist_abs_pen +0.0*yaw_err_abs_pen +0.2*yaw_progress`
 
 | Name | Weight | Function | Current params |
 |---|---:|---|---|
@@ -69,17 +70,17 @@ Configured reward-rate expression:
 | `fallen` | `-6.0` | `fallen_indicator` | `min_height=0.32`, `max_tilt=1.25` |
 | `joint_pos_limits` | `-0.5` | `joint_pos_limits` | all robot joints |
 | `low_height_soft_penalty` | `-1.6` | `low_height_soft_penalty` | `h_soft=0.48` |
-| `outside_area` | `0.0` | `outside_keeper_area_penalty` | `command_name=set_square` |
 | `stance_center_home_x_abs_pen` | `-0.2` | `stance_center_home_axis_abs_penalty` | `axis=x` |
 | `stance_center_home_x_progress` | `+0.3` | `stance_center_home_axis_progress_reward` | `axis=x`, `max_delta=0.12`, `apply_standing_gate=True` |
 | `stance_center_home_y_abs_pen` | `-0.7` | `stance_center_home_axis_abs_penalty` | `axis=y` |
 | `stance_center_home_y_progress` | `+1.0` | `stance_center_home_axis_progress_reward` | `axis=y`, `max_delta=0.2`, `apply_standing_gate=True` |
-| `stance_center_move_toward_home` | `+0.15` | `stance_center_move_toward_home_reward` | `r_deadband=0.10`, `v_cap=0.6`, `apply_standing_gate=True` |
+| `stance_center_move_toward_home` | `0.0` | `stance_center_move_toward_home_reward` | `r_deadband=0.10`, `v_cap=0.3`, `apply_standing_gate=True` |
 | `stance_ortho_abs_pen` | `-0.8` | `stance_ortho_abs_penalty` | foot-body defaults |
 | `stance_ortho_progress` | `+1.0` | `stance_ortho_progress_reward` | `max_delta=0.2`, `apply_standing_gate=True` |
-| `stance_width_band_pen` | `-0.25` | `stance_width_band_penalty` | `w_min=0.16`, `w_max=0.4` |
+| `stance_width_band_pen` | `-0.3` | `stance_width_band_penalty` | `w_min=0.23`, `w_max=0.45` |
+| `pelvis_between_feet` | `+0.15` | `pelvis_between_feet_reward` | `waist_body_name=(?i)^waist$`, `apply_standing_gate=True` |
 | `upright` | `+1.0` | `upright_stability_reward` | current upright constants above |
-| `yaw_align_waist` | `+0.1` | `yaw_alignment_waist_reward` | `k=2.5`, `apply_standing_gate=True` |
+| `yaw_align_waist` | `0.0` | `yaw_alignment_waist_reward` | `k=2.5`, `apply_standing_gate=True` |
 | `yaw_err_abs_pen` | `-0.1` | `waist_yaw_abs_penalty` | `upright_gate=0.0`; active posture defaults `tilt_target=0.0`, `tilt_band=-1.0`, `tilt_sigma=0.5` |
 | `yaw_progress` | `+0.2` | `waist_yaw_progress_reward` | `err_gate=0.0`, `upright_gate=0.0`, `max_delta=0.2`, `apply_standing_gate=True`; active posture defaults `tilt_target=0.0`, `tilt_band=-1.0`, `tilt_sigma=0.5` |
 
@@ -114,18 +115,7 @@ Conventions:
 - `raw = ReLU(h_soft - base_height)^2`
 - current `h_soft = 0.48`
 
-### Area / fall terms
-
-`outside_area`
-- configured reward weight is currently `0.0`, so `RewardManager` skips it at compute time
-- uses root position, not stance center
-- root XY is converted into env-local coordinates
-- with bounds `(x_min, x_max, y_min, y_max) = (6.0, 7.5, -2.0, 2.0)`:
-  - `x_low = (x_min - x)_+`
-  - `x_high = (x - x_max)_+`
-  - `y_low = (y_min - y)_+`
-  - `y_high = (y - y_max)_+`
-- `raw = x_low + x_high + y_low + y_high`
+### Fall terms
 
 `fallen`
 - `height = root_link_pos_w[:, 2]`
@@ -172,6 +162,7 @@ Current gated terms:
 - `stance_center_home_y_progress`
 - `stance_center_move_toward_home`
 - `stance_ortho_progress`
+- `pelvis_between_feet`
 
 ### Waist-yaw shaping
 
@@ -235,7 +226,7 @@ All three waist-yaw terms use the anatomical waist heading toward the current ba
 - `toward_speed = dot(v_center_xy, dir_to_home)`
 - `raw = clamp(toward_speed, 0, v_cap)`
 - standing gate is then applied
-- current `r_deadband = 0.10`, `v_cap = 0.6`
+- current `r_deadband = 0.10`, `v_cap = 0.3`
 
 ### Stance geometry shaping
 
@@ -261,9 +252,24 @@ Important interpretation:
 `stance_width_band_pen`
 - `width = ||right_foot_xy - left_foot_xy||`
 - `raw = ReLU(w_min - width)^2 + ReLU(width - w_max)^2`
-- current `w_min = 0.16`
-- current `w_max = 0.4`
+- current `w_min = 0.23`
+- current `w_max = 0.45`
 - penalizes both too-narrow and too-wide stance widths
+
+`pelvis_between_feet`
+- `center_xy = 0.5 * (left_foot_xy + right_foot_xy)`
+- `pelvis_xy = waist_body_xy`
+- `support_dir = normalize(right_foot_xy - left_foot_xy)`
+- `support_normal = (-support_dir_y, support_dir_x)`
+- `pelvis_offset = pelvis_xy - center_xy`
+- `longitudinal_offset = dot(pelvis_offset, support_dir)`
+- `lateral_offset = dot(pelvis_offset, support_normal)`
+- `lat_term = (lateral_offset / lateral_sigma)^2`
+- `long_term = (longitudinal_offset / longitudinal_sigma)^2`
+- `err = lateral_weight * lat_term + longitudinal_weight * long_term`
+- `raw = exp(-err)`
+- current defaults: `lateral_sigma = 0.09`, `longitudinal_sigma = 0.16`, `lateral_weight = 1.0`, `longitudinal_weight = 0.35`
+- standing gate is then applied, followed by the home-alignment ramp
 
 ## 5) Stateful Terms and First-Step Behavior
 
@@ -296,11 +302,14 @@ Current reward code emits the following `extras["log"]` metrics:
 - `Metrics/e1_move_toward_home_mean`
 - `Metrics/e1_stance_ortho_err_mean`
 - `Metrics/e1_stance_ortho_progress_mean`
+- `Metrics/e1_pelvis_between_feet_mean`
+- `Metrics/e1_pelvis_between_feet_lateral_offset_mean`
+- `Metrics/e1_pelvis_between_feet_longitudinal_offset_mean`
 - `Metrics/e1_angular_momentum_mean`
 
 Notes:
-- `outside_area`, `fallen`, `body_ang_vel`, and `stance_width_band_pen` do not currently emit dedicated reward logs from `mdp.py`.
-- `outside_area` is currently disabled by weight `0.0`, so it is also skipped by reward computation.
+- `fallen`, `body_ang_vel`, and `stance_width_band_pen` do not currently emit dedicated reward logs from `mdp.py`.
+- `stance_center_move_toward_home` and `yaw_align_waist` are configured but currently skipped by reward computation because their weights are `0.0`.
 - the standing-gate metrics are written by `_standing_gate()`, so they are refreshed whenever any gated term is evaluated.
 
 ## 7) Reward-Adjacent Terminations
