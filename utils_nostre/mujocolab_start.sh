@@ -84,11 +84,12 @@ fi
 #   MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER
 #   MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY
 if [ ! -f "$EXPERT_ENV_FILE" ]; then
-  echo "⚠ WARNING: Expert env file not found: $EXPERT_ENV_FILE"
-  echo "   Create it manually to configure local Stage-1 defaults."
-  EXPERT_ENV_ARGS=()
-  STAGE1_ENV_HASH="none"
+  echo "❌ ERROR: Expert env file not found: $EXPERT_ENV_FILE"
+  echo "   Create it manually to configure Stage-1 controller run paths."
+  exit 1
 else
+  # shellcheck disable=SC1090
+  source "$EXPERT_ENV_FILE"
   EXPERT_ENV_ARGS=(--env-file "$EXPERT_ENV_FILE")
   STAGE1_ENV_CANONICAL="$(grep -vE '^[[:space:]]*#|^[[:space:]]*$' "$EXPERT_ENV_FILE" || true)"
   if [ -n "$STAGE1_ENV_CANONICAL" ]; then
@@ -96,6 +97,16 @@ else
   else
     STAGE1_ENV_HASH="empty"
   fi
+  if [ -z "${MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER:-}" ]; then
+    echo "❌ ERROR: MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER is missing in $EXPERT_ENV_FILE"
+    exit 1
+  fi
+  if [ -z "${MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY:-}" ]; then
+    echo "❌ ERROR: MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY is missing in $EXPERT_ENV_FILE"
+    exit 1
+  fi
+  echo "=== Stage-1 goalkeeper controller run: $MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER"
+  echo "=== Stage-1 penalty controller run:    $MJLAB_STAGE1_WANDB_RUN_PATH_PENALTY"
 fi
 
 # ---------------- Build image if needed ----------------
