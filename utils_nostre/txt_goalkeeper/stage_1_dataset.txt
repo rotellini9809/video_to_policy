@@ -5,26 +5,12 @@ granchio_3_t1_23_motion_mirror -> mj9o3t1x
 granchio_short_2_t1_23_motion -> syph8reg
 granchio_short_1_t1_23_motion -> qxxgxnb7
 
-2026-03-06_14-23-20_rotazione_steps_1_t1_23_motion -> ozskmkcc
-2026-03-06_12-29-59_rotazione_steps_2_t1_23_motion -> v2nwg1m8
-2026-03-06_03-58-58_rotazione_steps_7_t1_23_motion -> er75lk2x
-
-2026-03-06_07-22-38_rotazione_steps_5_t1_23_motion -> tii7d0rs
-2026-03-06_05-40-32_rotazione_steps_6_t1_23_motion -> nqaivenk
-
+2026-03-06_10-47-13_rotazione_steps_3_t1_23_motion -> 5ppa0ze7
 2026-03-04_12-45-08_rotazione_steps_9_t1_23_motion -> 2fpat7jv
 rotazione_steps_11_t1_23_motion_2 -> ea9x2j69
 
 crouch_stance_1_t1_23_motion -> k0zgfxdw
-crouch_stance_1_t1_23_motion_mirror -> jb39mt8m
 crouch_stance_2_t1_23_motion -> 2cq7t122
-
-airone_1_t1_23_motion -> qdqrs4sm
-airone_2_t1_23_motion -> yfos6869
-airone_3_t1_23_motion -> jidtc2ij
-airone_1_t1_23_motion_mirror -> jk6il35b
-airone_2_t1_23_motion_mirror -> qljvuf1x
-airone_3_t1_23_motion_mirror -> jg4goerk
 
 allungo_piede_1_t1_23_motion -> mlwx9f4i
 allungo_piede_2_t1_23_motion -> 2f0x1jhy
@@ -122,5 +108,19 @@ parata_mani_4_t1_23_motion_mirror -> 9erku9l0
 
 2026-03-06_02-16-41_rotazione_steps_8_t1_23_motion -> 1bfwf2ce
 rotazione_steps_10_t1_23_motion_2 -> 1md04gzo
-2026-03-06_10-47-13_rotazione_steps_3_t1_23_motion -> 5ppa0ze7
+2026-03-06_14-23-20_rotazione_steps_1_t1_23_motion -> ozskmkcc
+2026-03-06_12-29-59_rotazione_steps_2_t1_23_motion -> v2nwg1m8
 2026-03-06_09-04-30_rotazione_steps_4_t1_23_motion -> py9pkjhb
+2026-03-06_03-58-58_rotazione_steps_7_t1_23_motion -> er75lk2x
+2026-03-06_07-22-38_rotazione_steps_5_t1_23_motion -> tii7d0rs
+2026-03-06_05-40-32_rotazione_steps_6_t1_23_motion -> nqaivenk
+
+
+crouch_stance_1_t1_23_motion_mirror -> jb39mt8m
+
+airone_1_t1_23_motion -> qdqrs4sm
+airone_2_t1_23_motion -> yfos6869
+airone_3_t1_23_motion -> jidtc2ij
+airone_1_t1_23_motion_mirror -> jk6il35b
+airone_2_t1_23_motion_mirror -> qljvuf1x
+airone_3_t1_23_motion_mirror -> jg4goerk

@@ -101,7 +101,6 @@ uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
   --current-stage 1 \
   --num-envs 4096 \
   --train-iterations-per-stage 5000 \
-  --execute
 ```
 
 Start from a previous W&B run:
@@ -112,7 +111,6 @@ uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
   --num-envs 4096 \
   --train-iterations-per-stage 5000 \
   --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<old_run_id>" \
-  --execute
 ```
 
 ### Play trained policy
