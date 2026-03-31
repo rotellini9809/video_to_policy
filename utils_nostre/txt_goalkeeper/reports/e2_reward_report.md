@@ -5,254 +5,236 @@ This report reflects the active E2 Stand Block task code in:
 - `mjlab/src/mjlab/tasks/goalkeeper_experts/e2_stand_block/mdp.py`
 - `mjlab/src/mjlab/managers/reward_manager.py`
 
-## 1) Reward Terms Configured in E2
+## 1) Reward Aggregation
 
-Per RL step, the environment reward is:
+Per RL step:
 
-`R_step = dt * R_rate`
+`R_step = dt * sum_i (w_i * raw_i)`
 
-Current configured reward-rate expression:
-
-`R_rate = -300*goal_conceded - 0.008*action_rate_l2 + 120*save_success + 40*deflect_away + 20*clearance_quality - 1.6*low_height_soft_penalty - 0.5*joint_pos_limits + 1.0*upright - 4.0*outside_area - 60*fallen`
-
-Current E2 timing:
+Current timing:
 - `SIM_TIMESTEP_S = 0.005`
 - `CONTROL_DECIMATION = 4`
 - `dt = 0.02`
-- `EPISODE_LENGTH_S = 5.0`
+- `EPISODE_LENGTH_S = 6.0`
 
 Current `RewardManager` behavior:
 - `compute()` multiplies each term by `weight * dt`
-- `torch.nan_to_num(...)` is applied to each weighted term contribution before accumulation
+- `torch.nan_to_num(...)` is applied to each weighted contribution before accumulation
 - `_step_reward` stores the unscaled reward rate `weight * raw`, not the `dt`-scaled step reward
 - `Episode_Reward/*` logs are episodic sums divided by `max_episode_length_s`
 - terms with weight `0.0` are skipped at compute time
 
-## 2) Term-by-Term Definition
+Current zero-weight configured term:
+- `deflect_away`
 
-### 2.1 `goal_conceded` (weight `-300`)
-Function:
-- `goal_conceded_indicator(...)`
+## 2) Active E2 Reward Terms
 
-Raw term:
-- `1.0` if the ball crosses the defended goal plane aperture, else `0.0`
+Current configured reward-rate expression:
 
-Goal plane used by reward/termination:
+`R_rate = -500.0*goal_conceded -0.005*action_rate_l2 +180.0*save_success +0.0*deflect_away +8.0*clearance_quality +2.5*stabilize_after_exit -3.0*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -10.0*outside_area -90.0*fallen`
+
+| Name | Weight | Function | Active params |
+|---|---:|---|---|
+| `goal_conceded` | `-500.0` | `goal_conceded_indicator` | `command_name=stand_block` |
+| `action_rate_l2` | `-0.005` | `action_rate_l2` | `command_name=stand_block` |
+| `save_success` | `+180.0` | `save_success_reward` | `resolution_term_name=contact_resolution_window`, `apply_standing_gate=False` |
+| `deflect_away` | `0.0` | `deflect_away_from_goal_reward` | `only_on_first_contact=True` |
+| `clearance_quality` | `+8.0` | `ClearanceQualityReward` | `t_clear_clip=0.5`, `clip_away_speed=2.5` |
+| `stabilize_after_exit` | `+2.5` | `StabilizeAfterExitReward` | default stabilization params |
+| `low_height_soft_penalty` | `-3.0` | `low_height_soft_penalty` | `h_soft=0.48` |
+| `joint_pos_limits` | `-0.35` | `joint_pos_limits` | all robot joints |
+| `upright` | `+2.0` | `upright_stability_reward` | `roll_band=0.10`, `roll_sigma=0.12`, `pitch_target=0.10`, `pitch_band=0.25`, `pitch_sigma=0.30` |
+| `body_ang_vel` | `-0.01` | `body_ang_vel_penalty` | `command_name=stand_block` |
+| `outside_area` | `-10.0` | `outside_area_penalty` | `command_name=stand_block` |
+| `fallen` | `-90.0` | `fallen_indicator` | `min_height=0.32`, `max_tilt=1.25` |
+
+## 3) Active Spatial and Timing Constants
+
+Goal-plane aperture used by active E2 reward and termination:
 - defended side is `+x`
-- `x >= 7.0`
-- `|y - 0.0| <= 1.30`
-- `z in [0.0, 1.85]`
+- `goal_plane_x = 7.0`
+- `goal_plane_y_center = 0.0`
+- `goal_plane_y_half = 1.30`
+- `goal_plane_z_min = 0.0`
+- `goal_plane_z_max = 1.85`
 
-Effect:
-- Large immediate penalty on conceded goals.
+Danger area used by clearance shaping:
+- `x in [5.2, 7.3]`
+- `y in [-2.5, 2.5]`
 
-### 2.2 `action_rate_l2` (weight `-0.008`)
-Function:
-- `action_rate_l2(command_name="stand_block")`
+Keeper area used by `outside_area`:
+- `x in [6.0, 7.6]`
+- `y in [-2.0, 2.0]`
 
-Raw term:
-- base raw is `sum((action_t - action_{t-1})^2)` over the policy action vector
-- implemented through the generic MDP reward helper
-- current E2 wrapper applies an all-ones reward-active mask, so the term is effectively always on
+Other reward-adjacent constants:
+- resolution window: `1.5 s`
+- keeper spawn band: centered around E1 home point `(6.75, 0.0)` with radius `0.10`
+- spawn yaw offset range: `[-0.1, 0.1]`
 
-Effect:
-- Penalizes abrupt action changes and smooths the stand-block response.
+## 4) Term-by-Term Raw Definitions
 
-### 2.3 `save_success` (weight `+120`)
-Function:
-- `save_success_reward(..., resolution_term_name="contact_resolution_window", apply_standing_gate=True)`
+`goal_conceded`
+- `raw = 1.0` if the ball crosses the defended goal-plane aperture, else `0.0`
+- this is also a termination condition
 
-Raw term:
-- `success = 1.0` only when:
-  - `contact_resolution_window` termination is active for that step, and
-  - goal is not conceded
-- else `success = 0.0`
-- final raw is `success * standing_gate`
+`action_rate_l2`
+- base raw is `sum((action_t - action_{t-1})^2)`
+- the E2 wrapper applies `_reward_active_mask(...)`
+- current `_reward_active_mask(...)` is always all-ones, so this behaves like the base reward
 
-Effect:
-- Gives sparse success credit at the end of the fixed post-contact resolution window, but discounts it when the keeper is too low or poorly aligned.
+`save_success`
+- `resolution_done = termination_manager.get_term("contact_resolution_window")`
+- `goal = goal_conceded_mask`
+- `success = 1.0` only when the fixed post-contact resolution window ends and no goal was conceded
+- final raw is just `success`
 
-### 2.4 `deflect_away` (weight `+40`)
-Function:
-- `deflect_away_from_goal_reward(..., only_on_first_contact=True)`
-
-Raw term:
+`deflect_away`
 - on first keeper-ball contact only, compute away-from-goal X speed
-- for the defended `+x` goal: `clamp(-v_x, 0, clip_speed)` with `clip_speed=4.0`
-- final raw is `away_speed * first_contact_mask`
-- current config does not apply the standing gate to this term
+- for the defended `+x` goal: `away_speed = clamp(-v_x, 0, clip_speed)`
+- default `clip_speed = 4.0`
+- raw is `away_speed * first_contact_mask`
+- currently skipped because weight is `0.0`
 
-Effect:
-- Rewards redirection quality at the first save contact.
-
-### 2.5 `clearance_quality` (weight `+20`)
-Function:
-- `ClearanceQualityReward(command_name="stand_block")`
-
-Raw term:
-- uses the command danger area bounds:
-  - `x in [5.2, 7.3]`
-  - `y in [-2.5, 2.5]`
-- after first contact has been latched by `contact_resolution_window`, tracks whether the ball exits that danger area
-- requires the ball to stay outside for `outside_steps_required = 2` RL steps before rewarding
+`clearance_quality`
+- after first contact, tracks whether the ball leaves the configured danger area
+- requires the ball to stay outside for `outside_steps_required = 2` RL steps before confirming exit
 - reward is emitted once per episode
 - current raw is:
   - `exit_event * time_factor * vel_factor`
-  - `time_factor = clamp(1 - t_clear / 1.5, 0, 1)`
-  - `vel_factor = clamp(v_away / 4.0, 0, 1)`
-  - `t_clear = current_time - t_contact`
-  - `v_away = clamp(-v_x, 0, 4.0)` for the defended `+x` goal
+  - `t_clear = clamp(t_now - t_contact, min=0)`
+  - `t_clear_reward = clamp(t_clear, max=0.5)`
+  - `time_factor = clamp(1 - t_clear_reward / 1.5, 0, 1)`
+  - `v_away = clamp(-v_x, 0, 2.5)` for the defended `+x` goal
+  - `vel_factor = clamp(v_away / 2.5, 0, 1)`
 
-Effect:
-- Rewards not just touching the ball, but clearing it out of the immediate danger zone quickly and with away-from-goal velocity.
+`stabilize_after_exit`
+- becomes active only after the same confirmed danger-area exit logic has latched a post-exit phase
+- raw is:
+  - `0.6 * upright_score`
+  - `+ 0.4 * height_score`
+  - `- 0.20 * stance_width_pen`
+  - `- 0.15 * lin_speed_pen`
+  - `- 0.10 * ang_speed_pen`
+- where:
+  - `height_score = clamp((base_height - 0.40) / (0.58 - 0.40), 0, 1)`
+  - `stance_width_pen = ReLU(0.23 - stance_width)^2 + ReLU(stance_width - 0.45)^2`
+  - `lin_speed_pen = vx^2 + vy^2`
+  - `ang_speed_pen = wx^2 + wy^2 + 1.5 * wz^2`
+- the posture part of this term uses its own defaults:
+  - `roll_band = 0.10`
+  - `roll_sigma = 0.12`
+  - `pitch_target = 0.25`
+  - `pitch_band = 0.20`
+  - `pitch_sigma = 0.30`
 
-### 2.6 `low_height_soft_penalty` (weight `-1.6`)
-Function:
-- `low_height_soft_penalty(h_soft=0.48)`
+`low_height_soft_penalty`
+- `raw = ReLU(0.48 - base_height)^2`
 
-Raw term:
-- `height = root_link_pos_w[:, 2]`
-- `low = ReLU(0.48 - height)`
-- `raw = low^2`
+`joint_pos_limits`
+- generic soft position-limit violation sum over all robot joints
+- wrapper is active but currently equivalent to the base reward because `_reward_active_mask(...)` is always true
 
-Effect:
-- Penalizes crouching/collapse before the hard fallen condition triggers.
-
-### 2.7 `joint_pos_limits` (weight `-0.5`)
-Function:
-- `joint_pos_limits(asset_cfg=SceneEntityCfg("robot", joint_names=(".*",)), command_name="stand_block")`
-
-Raw term:
-- uses the generic soft joint-limit penalty over all robot joints
-- for each joint, accumulates violation beyond the configured soft lower/upper position limits
-- current E2 wrapper applies an all-ones reward-active mask, so the term is effectively always on
-
-Effect:
-- Discourages using joint-end-range postures while blocking.
-
-### 2.8 `upright` (weight `+1.0`)
-Function:
-- `upright_stability_reward`
-
-Raw term:
+`upright`
 - anisotropic posture score from body-frame projected gravity:
-  - `sagittal = projected_gravity_b[:, 0]`
-  - `lateral = projected_gravity_b[:, 1]`
-  - `roll_error = ReLU(|lateral| - 0.1)`
+  - `roll_error = ReLU(|lateral| - 0.10)`
   - `roll_score = exp(-(roll_error^2) / 0.12^2)`
   - `pitch_error = ReLU(|sagittal - 0.10| - 0.25)`
   - `pitch_score = exp(-(pitch_error^2) / 0.30^2)`
   - `raw = roll_score * pitch_score`
 
-Effect:
-- Rewards upright trunk posture continuously, with stricter lateral alignment than sagittal alignment.
+`body_ang_vel`
+- `raw = wx^2 + wy^2`
+- uses root-link angular velocity in world XY
 
-### 2.9 `outside_area` (weight `-4.0`)
-Function:
-- `outside_area_penalty(command_name="stand_block")`
-
-Raw term:
-- keeper area bounds are:
-  - `x in [6.0, 7.6]`
-  - `y in [-2.0, 2.0]`
-- compute base position in env-local XY
-- measure distance outside the rectangular bounds:
-  - `x_out = ReLU(x_min - x) + ReLU(x - x_max)`
-  - `y_out = ReLU(y_min - y) + ReLU(y - y_max)`
+`outside_area`
+- compute keeper base position in env-local XY
+- `x_out = ReLU(x_min - x) + ReLU(x - x_max)`
+- `y_out = ReLU(y_min - y) + ReLU(y - y_max)`
 - `raw = x_out^2 + y_out^2`
 
-Effect:
-- Softly penalizes drifting out of the intended keeper zone without terminating the episode.
+`fallen`
+- `height = root_link_pos_w[:, 2]`
+- `tilt = ||projected_gravity_b[:, :2]||`
+- `raw = 1.0` if `(height < 0.32) OR (tilt > 1.25)`, else `0.0`
 
-### 2.10 `fallen` (weight `-60`)
-Function:
-- `fallen_indicator(min_height=0.32, max_tilt=1.25)` via config override
+## 5) Sparse Reward Gating and Exit Logic
 
-Raw term:
-- `1.0` if `(height < 0.32) OR (tilt > 1.25)`, else `0.0`
-- `tilt = norm(projected_gravity_b[:, :2])`
+No active E2 reward term currently enables the standing gate in `env_cfgs.py`.
 
-Effect:
-- Strong per-step penalty for unstable or fallen poses.
-
-## 3) Terminations That Interact With Reward
-
-Configured terminations:
-- `time_out`
-- `goal_conceded`
-- `contact_resolution_window` via `ContactResolutionTermination`
-- `fallen` via `FallTermination(..., consecutive_steps=6)`
-
-Not currently configured:
-- no hard out-of-area termination
-
-### Contact-resolution logic
-- first keeper-ball contact is detected by sensor `ball_robot_contact`
-- sensor match is ball geom `ball_collision` on entity `soccer_ball` vs robot subtree `Trunk`
-- `t_contact` is latched once per env and then not overwritten
-- termination fires when `t_now - t_contact >= 1.5 s`
-- on reset, `t_contact` is restored to unset
-- goal termination remains separate and immediate
-
-### Fall-termination logic
-- fallen state is based on the same thresholds used by the `fallen` reward term in config:
-  - `height < 0.32` or `tilt > 1.25`
-- termination requires this condition to persist for `6` consecutive RL steps
-
-## 4) Standing Gate on Sparse Rewards
-
-Standing gate is currently applied to:
-- `save_success`
-
-Current standing-gate constants:
+Active standing-gate constants from `_standing_gate(...)`:
 - `h_low = 0.36`
 - `h_good = 0.56`
-- `roll_band = 0.1`
+- `roll_band = 0.10`
 - `roll_sigma = 0.12`
 - `pitch_target = 0.25`
 - `pitch_band = 0.20`
 - `pitch_sigma = 0.30`
 
 Computation:
-- `height_score = clamp((base_height - h_low)/(h_good - h_low), 0, 1)`
-- `posture_score = posture(projected_gravity_b; 0.1, 0.12, 0.25, 0.20, 0.30)`
-- `stand_score = posture_score * height_score`
-- `standing_gate = stand_score`
+- `height_score = clamp((base_height - h_low) / (h_good - h_low), 0, 1)`
+- `posture_score = posture(projected_gravity_b; 0.10, 0.12, 0.25, 0.20, 0.30)`
+- `standing_gate = posture_score * height_score`
 
-Current relationship to `upright`:
-- roll settings still match
-- pitch settings do not match anymore
-- `upright` uses `pitch_target = 0.10` and `pitch_band = 0.25`
-- the sparse-reward standing gate uses `pitch_target = 0.25` and `pitch_band = 0.20`
+If a term enables `apply_standing_gate=True`, its raw reward is multiplied by this factor.
 
-## 5) Visual / Area Constraints
+Current relationship to the main `upright` term:
+- roll settings match
+- pitch settings do not match
+- `upright` uses `pitch_target = 0.10`, `pitch_band = 0.25`
+- the sparse-reward standing gate still uses `pitch_target = 0.25`, `pitch_band = 0.20`
 
-Current E2 implementation includes:
-- goal-plane overlay geometry in the field asset
-- danger-area overlay geometry in the field asset
-- keeper-area overlay geometry in the field asset
-- launcher status GUI markdown in the command panel
+Confirmed danger-area exit behavior used by `clearance_quality` and `stabilize_after_exit`:
+- first contact time is latched once by `ContactResolutionTermination`
+- exit is only confirmed after the ball remains outside the danger area for `2` RL steps
+- both reward classes maintain their own internal exit latch state, but they implement the same confirmation rule
 
-Area logic currently used by reward:
-- danger area drives `clearance_quality`
-- keeper area drives `outside_area`
+## 6) Reward-Adjacent Terminations
+
+Configured terminations:
+- `time_out`
+- `nan_detection`
+- `goal_conceded`
+- `contact_resolution_window`
+- `fallen`
+
+Goal termination:
+- immediate once the goal-plane aperture is crossed
+
+Contact-resolution termination:
+- first keeper-ball contact is detected using sensor `ball_robot_contact`
+- first contact time `t_contact` is latched once per env
+- termination fires when `t_now - t_contact >= 1.5 s`
+
+Fall termination:
+- uses the same thresholds as the `fallen` reward term in config:
+  - `height < 0.32` or `tilt > 1.25`
+- termination requires the condition for `6` consecutive RL steps
 
 Not currently configured:
 - no hard out-of-area termination
 
-## 6) Episode Timing Context
+## 7) Logging and Practical Reading
 
-- Episode length is `5.0 s`
-- sim `dt = 0.005 s`
-- control decimation is `4`
-- RL step `step_dt = 0.02 s`
-- resolution window is `1.5 s` and is quantized at step resolution
+Current E2 reward code logs these reward-adjacent metrics into `extras["log"]`:
+- `Metrics/e2_ball_in_danger_mean`
+- `Metrics/e2_clearance_exit_event_mean`
+- `Metrics/e2_clearance_exit_time_mean`
+- `Metrics/e2_clearance_quality_raw_mean`
+- `Metrics/e2_stabilize_after_exit_height_score_mean`
+- `Metrics/e2_stabilize_after_exit_stance_width_mean`
+- `Metrics/e2_stabilize_after_exit_stance_width_pen_mean`
+- `Metrics/e2_roll_score_mean`
+- `Metrics/e2_pitch_score_mean`
+- `Metrics/e2_lateral_posture_component_mean`
+- `Metrics/e2_sagittal_posture_component_mean`
+- `Metrics/e2_low_height_soft_pen_mean`
+- `Metrics/e2_outside_area_penalty_mean`
 
-## 7) Practical Reading of Current Reward Design
+Standing-gate metrics are not currently emitted because no active E2 reward term calls `_standing_gate(...)`.
 
-1. E2 is still dominated by sparse outcome events: large fail (`goal_conceded`) and large success (`save_success`).
-2. First-contact block mechanics are rewarded directly through `deflect_away`.
-3. Post-contact ball safety is now shaped explicitly through `clearance_quality`, which rewards clearing the ball out of the danger zone after contact.
-4. Stability is shaped continuously by `upright`, `low_height_soft_penalty`, and `fallen`, while `save_success` is additionally filtered by the standing gate.
-5. Keeper positioning discipline is now part of reward shaping through `outside_area`, but it is still not a termination condition.
-6. Action smoothness and joint-end-range usage remain explicitly regularized through `action_rate_l2` and `joint_pos_limits`.
+Current practical interpretation:
+1. E2 is still dominated by sparse outcome terms: very large fail on `goal_conceded` and very large success on `save_success`.
+2. `deflect_away` is implemented but currently disabled with weight `0.0`.
+3. Post-contact ball safety is shaped by `clearance_quality`, and post-clear stabilization is shaped by `stabilize_after_exit`.
+4. Continuous pose discipline is enforced by `upright`, `low_height_soft_penalty`, `body_ang_vel`, `outside_area`, and `fallen`.
+5. Action smoothness and joint-limit use remain explicitly regularized through `action_rate_l2` and `joint_pos_limits`.
