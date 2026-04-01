@@ -57,8 +57,7 @@ uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
 uv run python src/mjlab/scripts/auto_promote_gk_e1_curriculum.py \
   --current-stage 1 \
   --num-envs 4096 \
-  --train-iterations-per-stage 5000 \
-  --execute
+  --train-iterations-per-stage 5000
 ```
 
 Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3>` to select the E1 curriculum stage for that run.

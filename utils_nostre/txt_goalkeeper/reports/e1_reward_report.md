@@ -25,9 +25,14 @@ Current `RewardManager` behavior:
 - terms with weight `0.0` are skipped at compute time
 
 Current zero-weight configured terms:
+- `body_ang_vel`
+- `stance_center_home_x_progress`
+- `stance_center_home_y_progress`
 - `stance_center_move_toward_home`
+- `stance_ortho_progress`
 - `pelvis_between_feet`
 - `yaw_err_abs_pen`
+- `yaw_progress`
 
 Implemented in `mdp.py` but not currently configured in `cfg.rewards`:
 - `yaw_alignment_waist_reward`
@@ -36,9 +41,9 @@ Implemented in `mdp.py` but not currently configured in `cfg.rewards`:
 ## 2) Task Context
 
 Relevant active constants from `env_cfgs.py`:
-- home point: `(KEEPER_HOME_POINT_X, KEEPER_HOME_POINT_Y) = (6.75, 0.0)`
+- home point: `(KEEPER_HOME_POINT_X, KEEPER_HOME_POINT_Y) = (6.70, 0.0)`
 - keeper area: `x in [6.0, 7.5]`, `y in [-2.0, 2.0]`
-- home-point band / viz radius: `HOME_POINT_BAND_RADIUS = 0.10`
+- home-point band / viz radius: `HOME_POINT_BAND_RADIUS = 0.20`
 - upright reward constants:
   - `roll_band = 0.10`
   - `roll_sigma = 0.12`
@@ -60,34 +65,34 @@ Body-name settings used by stance-related rewards:
 
 Current configured reward-rate expression:
 
-`R_rate = -0.008*action_rate_l2 -0.005*angular_momentum -0.01*body_ang_vel -6.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.2*stance_center_home_x_abs_pen +0.3*stance_center_home_x_progress -0.7*stance_center_home_y_abs_pen +1.0*stance_center_home_y_progress +0.0*stance_center_move_toward_home -0.9*stance_ortho_abs_pen +1.15*stance_ortho_progress -0.3*stance_width_band_pen +0.0*pelvis_between_feet +1.0*upright -0.05*waist_ready_twist_abs_pen +0.0*yaw_err_abs_pen +0.2*yaw_progress`
+`R_rate = -0.008*action_rate_l2 -0.005*angular_momentum +0.0*body_ang_vel -6.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.2*stance_center_home_x_abs_pen +0.0*stance_center_home_x_progress -0.7*stance_center_home_y_abs_pen +0.0*stance_center_home_y_progress +0.0*stance_center_move_toward_home -0.9*stance_ortho_abs_pen +0.0*stance_ortho_progress -0.3*stance_width_band_pen +0.0*pelvis_between_feet +1.0*upright -0.05*waist_ready_twist_abs_pen +0.0*yaw_err_abs_pen +0.0*yaw_progress`
 
 | Name | Weight | Function | Active params |
 |---|---:|---|---|
 | `action_rate_l2` | `-0.008` | `action_rate_l2` | none |
 | `angular_momentum` | `-0.005` | `angular_momentum_penalty` | `sensor_name=robot/root_angmom` |
-| `body_ang_vel` | `-0.01` | `body_ang_vel_penalty` | none |
+| `body_ang_vel` | `0.0` | `body_ang_vel_penalty` | none |
 | `fallen` | `-6.0` | `fallen_indicator` | `min_height=0.32`, `max_tilt=1.25` |
 | `joint_pos_limits` | `-0.5` | `joint_pos_limits` | all robot joints |
 | `low_height_soft_penalty` | `-1.6` | `low_height_soft_penalty` | `h_soft=0.48` |
 | `stance_center_home_x_abs_pen` | `-0.2` | `stance_center_home_axis_abs_penalty` | `axis=x` |
-| `stance_center_home_x_progress` | `+0.3` | `stance_center_home_axis_progress_reward` | `axis=x`, `max_delta=0.12`, `apply_standing_gate=True` |
+| `stance_center_home_x_progress` | `0.0` | `stance_center_home_axis_progress_reward` | `axis=x`, `max_delta=0.12`, `apply_standing_gate=True` |
 | `stance_center_home_y_abs_pen` | `-0.7` | `stance_center_home_axis_abs_penalty` | `axis=y` |
-| `stance_center_home_y_progress` | `+1.0` | `stance_center_home_axis_progress_reward` | `axis=y`, `max_delta=0.20`, `apply_standing_gate=True` |
-| `stance_center_move_toward_home` | `0.0` | `stance_center_move_toward_home_reward` | `r_deadband=0.10`, `v_cap=0.3`, `apply_standing_gate=True` |
+| `stance_center_home_y_progress` | `0.0` | `stance_center_home_axis_progress_reward` | `axis=y`, `max_delta=0.20`, `apply_standing_gate=True` |
+| `stance_center_move_toward_home` | `0.0` | `stance_center_move_toward_home_reward` | `r_deadband=0.20`, `v_cap=0.3`, `apply_standing_gate=True` |
 | `stance_ortho_abs_pen` | `-0.9` | `stance_ortho_abs_penalty` | foot-body defaults |
-| `stance_ortho_progress` | `+1.15` | `stance_ortho_progress_reward` | `max_delta=0.20`, `apply_standing_gate=True` |
+| `stance_ortho_progress` | `0.0` | `stance_ortho_progress_reward` | `max_delta=0.20`, `apply_standing_gate=True` |
 | `stance_width_band_pen` | `-0.3` | `stance_width_band_penalty` | `w_min=0.23`, `w_max=0.45` |
 | `pelvis_between_feet` | `0.0` | `pelvis_between_feet_reward` | `waist_body_name=(?i)^waist$`, `apply_standing_gate=True` |
 | `upright` | `+1.0` | `upright_stability_reward` | upright constants above |
 | `waist_ready_twist_abs_pen` | `-0.05` | `waist_ready_twist_abs_penalty` | `k=2.5`, `apply_standing_gate=True` |
 | `yaw_err_abs_pen` | `0.0` | `waist_yaw_abs_penalty` | `upright_gate=0.0` |
-| `yaw_progress` | `+0.2` | `waist_yaw_progress_reward` | `err_gate=0.0`, `upright_gate=0.0`, `max_delta=0.20`, `apply_standing_gate=True` |
+| `yaw_progress` | `0.0` | `waist_yaw_progress_reward` | `err_gate=0.0`, `upright_gate=0.0`, `max_delta=0.20`, `apply_standing_gate=True` |
 
 ## 4) Core Raw Definitions
 
 Conventions:
-- `home_xy = env_origin_xy + (6.75, 0.0)`
+- `home_xy = env_origin_xy + (6.70, 0.0)`
 - `center_xy = 0.5 * (left_foot_xy + right_foot_xy)`
 - `ReLU(x) = max(x, 0)`
 - `clamp(x, a, b)` clips to `[a, b]`
@@ -324,7 +329,7 @@ Terms without dedicated extra logging in `mdp.py`:
 
 ## 9) Coupled Visualization Constant
 
-`HOME_POINT_BAND_RADIUS = 0.10` is shared by:
+`HOME_POINT_BAND_RADIUS = 0.20` is shared by:
 - `stance_center_move_toward_home.r_deadband`
 - `SetSquareCommandCfg.VizCfg.home_point_radius`
 
