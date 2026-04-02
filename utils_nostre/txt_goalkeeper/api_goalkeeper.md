@@ -69,6 +69,39 @@ uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
   --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" 
 ```
 
+## E1V2 - Mezzaluna
+
+Task ID: `Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23`
+
+### Dry run
+
+```bash
+uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
+  --agent zero \
+  --num-envs 1 \
+  --viewer native \
+  --no-fall-termination
+```
+
+### Train stage 3 from zero
+
+```bash
+MJLAB_E1_RESET_CURRICULUM_STAGE=3 \
+uv run train Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
+  --env.scene.num-envs 4096 \
+  --agent.max_iterations 5000
+```
+
+### Play trained policy from W&B
+
+```bash
+MJLAB_E1_RESET_CURRICULUM_STAGE=3 \
+uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
+  --num-envs 1 \
+  --viewer viser \
+  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>"
+```
+
 ## E2 - StandBlock
 
 Task ID: `Mjlab-GK-Expert-StandBlock-Booster-T1_23`
