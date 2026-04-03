@@ -23,8 +23,9 @@ Resume from W&B:
 MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3> \
 uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
   --agent.resume True \
-  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" \
-  --wandb-checkpoint-name best
+  --wandb-checkpoint-name last \
+  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" 
+  
 ```
 
 Notes:
@@ -132,7 +133,7 @@ Start from stage 1:
 uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
   --current-stage 1 \
   --num-envs 4096 \
-  --train-iterations-per-stage 5000 \
+  --train-iterations-per-stage 7000 
 ```
 
 Start from a previous W&B run:
