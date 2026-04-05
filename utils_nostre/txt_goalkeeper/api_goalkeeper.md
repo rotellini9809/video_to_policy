@@ -164,6 +164,39 @@ uv run python src/mjlab/scripts/validate_gk_e2_launcher.py \
   --num-envs 4096
 ```
 
+## E2V2 - Mezzaluna
+
+Task ID: `Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23`
+
+### Dry run
+
+```bash
+MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=2 \
+uv run play Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
+  --agent zero \
+  --num-envs 1 \
+  --viewer viser
+```
+
+### Train stage 2 from zero
+
+```bash
+MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=2 \
+uv run train Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
+  --agent.run-name e2v2_mezzaluna_stage2_from_scratch \
+  --agent.max-iterations 20000
+```
+
+### Play trained policy from W&B
+
+```bash
+MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=2 \
+uv run play Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
+  --num-envs 1 \
+  --viewer viser \
+  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<run_id>"
+```
+
 ## E3 - ClearAway
 
 Task ID: `Mjlab-GK-Expert-ClearAway-Booster-T1_23`
