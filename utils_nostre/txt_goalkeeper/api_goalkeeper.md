@@ -77,6 +77,7 @@ Task ID: `Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23`
 ### Dry run
 
 ```bash
+MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
 uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
   --agent zero \
   --num-envs 1 \
@@ -84,13 +85,13 @@ uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
   --no-fall-termination True
 ```
 
-### Train stage 3 from zero
+### Train from zero
 
 ```bash
 MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
 uv run train Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
   --env.scene.num-envs 4096 \
-  --agent.max_iterations 5000
+  --agent.max_iterations 5000 
 ```
 
 ### Play trained policy from W&B
@@ -181,10 +182,11 @@ uv run play Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
 ### Train stage 2 from zero
 
 ```bash
-MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=2 \
+MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=3 \
 uv run train Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
   --agent.run-name e2v2_mezzaluna_stage2_from_scratch \
-  --agent.max-iterations 20000
+  --agent.max-iterations 20000 \
+  --env.scene.num-envs 4096
 ```
 
 ### Play trained policy from W&B

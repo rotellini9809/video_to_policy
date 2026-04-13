@@ -16,9 +16,9 @@ uv run play Mjlab-Velocity-Flat-Unitree-G1 \
 ```bash
 # Single CSV (Booster T1 23 dof)
 uv run src/mjlab/scripts/csv_to_npz_booster_t1_23dof.py \
-  --input-file human_to_robot_output/booster_t1/my_motion.csv \
   --input-fps 30 \
-  --output-fps 50
+  --output-fps 50 \
+  --input-file human_to_robot_output/booster_t1/my_motion.csv 
 
 # Batch folder (recursive)
 uv run src/mjlab/scripts/csv_to_npz_booster_t1_23dof.py \
@@ -41,7 +41,7 @@ uv run src/mjlab/scripts/mirror_csv_booster_t1_23dof.py \
 uv run train Mjlab-Tracking-Flat-Booster-T1_23 \
   --registry-name <entity>/csv_to_npz/<artifact_name>:v0 \
   --env.scene.num-envs 4096 \
-  --agent.max_iterations 15000 \
+  --agent.max_iterations 5000 \
   --agent.run_name <run_name>
 ```
 
@@ -120,18 +120,18 @@ NPMP (recommended):
 
 ```bash
 uv run train-motor-stage1 \
-  --data-root ./data/motor_controller_rollouts/training_dataset1 \
   --latent-type npmp \
   --sample-mode chunk \
   --chunk-len 32 \
   --k-future 10 \
-  --max-iters 20000 \
+  --max-iters 25000 \
   --val-frac 0.1 \
   --seed 0 \
   --run-name final_test_npmp_chunk32_k10_seed0 \
   --beta-kl-end 1e-2 \
   --beta-kl-warmup-iters 10000 \
-  --log-every 50
+  --log-every 150 \
+  --data-root ./data/motor_controller_rollouts/training_dataset1 
 ```
 
 VAE-lite (step mode):
