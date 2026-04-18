@@ -185,7 +185,7 @@ uv run play Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
 MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=1 \
 uv run train Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
   --agent.run-name e2v2_mezzaluna_stage2_from_scratch \
-  --agent.max-iterations 20000 \
+  --agent.max-iterations 30000 \
   --env.scene.num-envs 4096
 ```
 
