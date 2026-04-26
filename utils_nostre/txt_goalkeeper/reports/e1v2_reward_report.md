@@ -24,8 +24,11 @@ Current `RewardManager` behavior:
 - episodic reward logs are normalized by episode length in seconds
 
 Current zero-weight configured terms:
-- `body_ang_vel`
+- `stance_center_target_progress`
+- `ball_in_fov`
+- `stance_width_band_pen`
 - `pelvis_between_feet`
+- `waist_ready_twist_abs_pen`
 
 Implemented in `mdp.py` but not currently configured:
 - `outside_keeper_area_penalty`
@@ -51,24 +54,34 @@ Body-name settings used by the stance terms:
 
 ## Current Weighted Reward Set
 
-Current reward-rate expression:
+Current reward-rate expression depends on curriculum stage only through
+`action_rate_l2`:
 
-`R_rate = -0.004*action_rate_l2 +0.0*body_ang_vel -20.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.35*stance_center_home_x_abs_pen -1.10*stance_center_home_y_abs_pen +0.65*stance_ortho_to_ball_reward -0.3*stance_width_band_pen +0.0*pelvis_between_feet +0.8*upright -0.10*waist_ready_twist_abs_pen`
+Stage 1:
+
+`R_rate = -0.002*action_rate_l2 -0.01*body_ang_vel -20.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.45*stance_center_target_xy_abs_pen +1.5*stance_ortho_to_ball_reward +0.8*upright`
+
+Stage 2+:
+
+`R_rate = -0.004*action_rate_l2 -0.01*body_ang_vel -20.0*fallen -0.5*joint_pos_limits -1.6*low_height_soft_penalty -0.45*stance_center_target_xy_abs_pen +1.5*stance_ortho_to_ball_reward +0.8*upright`
+
+Configured reward table:
 
 | Name | Weight | Function | Main params |
 |---|---:|---|---|
-| `action_rate_l2` | `-0.004` | `action_rate_l2` | none |
-| `body_ang_vel` | `0.0` | `body_ang_vel_penalty` | none |
+| `action_rate_l2` | `-0.002` in stage 1, `-0.004` in stage 2+ | `action_rate_l2` | none |
+| `body_ang_vel` | `-0.01` | `body_ang_vel_penalty` | none |
 | `fallen` | `-20.0` | `fallen_indicator` | `min_height=0.32`, `max_roll_deg=100.0` |
 | `joint_pos_limits` | `-0.5` | `joint_pos_limits` | all robot joints |
 | `low_height_soft_penalty` | `-1.6` | `low_height_soft_penalty` | `h_soft=0.48` |
-| `stance_center_home_x_abs_pen` | `-0.35` | `stance_center_home_axis_abs_penalty` | `axis=x` |
-| `stance_center_home_y_abs_pen` | `-1.10` | `stance_center_home_axis_abs_penalty` | `axis=y` |
-| `stance_ortho_to_ball_reward` | `+0.65` | `stance_ortho_to_ball_reward` | `ortho_deadband=0.10` |
-| `stance_width_band_pen` | `-0.3` | `stance_width_band_penalty` | `w_min=0.23`, `w_max=0.45` |
+| `stance_center_target_xy_abs_pen` | `-0.45` | `stance_center_target_xy_abs_penalty` | `command_name=set_square`, stance feet from `^left_foot_link$` / `^right_foot_link$` |
+| `stance_center_target_progress` | `0.0` | `stance_center_target_progress_reward` | `command_name=set_square`, stance feet from `^left_foot_link$` / `^right_foot_link$` |
+| `stance_ortho_to_ball_reward` | `+1.5` | `stance_ortho_to_ball_reward` | `command_name=set_square`, `ortho_deadband=0.10` |
+| `ball_in_fov` | `0.0` | `ball_in_fov_reward` | `command_name=set_square` |
+| `stance_width_band_pen` | `0.0` | `stance_width_band_penalty` | `w_min=0.23`, `w_max=0.45` |
 | `pelvis_between_feet` | `0.0` | `pelvis_between_feet_reward` | `waist_body_name=(?i)^waist$`, `apply_standing_gate=True` |
 | `upright` | `+0.8` | `upright_stability_reward` | `roll_band=0.10`, `roll_sigma=0.12`, `pitch_target=0.25`, `pitch_band=0.20`, `pitch_sigma=0.30` |
-| `waist_ready_twist_abs_pen` | `-0.10` | `waist_ready_twist_abs_penalty` | `k=2.5`, `apply_standing_gate=True` |
+| `waist_ready_twist_abs_pen` | `0.0` | `waist_ready_twist_abs_penalty` | `k=2.5`, `apply_standing_gate=True` |
 
 ## Raw Reward Notes
 
@@ -84,19 +97,26 @@ Current reward-rate expression:
 `low_height_soft_penalty`
 - `raw = relu(0.48 - base_height)^2`
 
-`stance_center_home_x_abs_pen`
-- `raw = |target_x - stance_center_x|`
+`stance_center_target_xy_abs_pen`
+- `raw = ||reward_target_xy - stance_center_xy||_2`
+- this replaces the older split x/y absolute penalties
 
-`stance_center_home_y_abs_pen`
-- `raw = |target_y - stance_center_y|`
+`stance_center_target_progress`
+- rewards positive reduction in stance-center error to the current reward target
+- currently configured off because weight is `0.0`
 
 `stance_ortho_to_ball_reward`
 - rewards keeping the foot-line orthogonal to the ball direction
 - uses the current stance center and the ball direction from that stance center
 - respects the configured `ortho_deadband`
 
+`ball_in_fov`
+- binary visibility reward based on the configured planar FOV mask
+- currently configured off because weight is `0.0`
+
 `stance_width_band_pen`
 - `raw = relu(0.23 - width)^2 + relu(width - 0.45)^2`
+- currently configured off because weight is `0.0`
 
 `pelvis_between_feet`
 - lateral pelvis-centering reward in the support frame
@@ -109,6 +129,7 @@ Current reward-rate expression:
 `waist_ready_twist_abs_pen`
 - penalizes waist yaw that deviates from the ball-facing ready orientation
 - applies the standing gate before accumulation
+- currently configured off because weight is `0.0`
 
 ## Shared Helpers And Gates
 
