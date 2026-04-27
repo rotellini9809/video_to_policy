@@ -1,6 +1,5 @@
 # Goalkeeper API
 
-
 ## Shared prerequisites
 
 ```bash
@@ -14,71 +13,41 @@ export MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER="$ENTITY/motor_controller_stage1/$
 export MJLAB_STAGE1_CHECKPOINT=best
 ```
 
-## Resume Existing Run
+## Resume an existing run
 
-Resume from W&B:
+Resume E1 from W&B:
 
 ```bash
-# E1
 MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3> \
-uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
+uv run train Mjlab-GK-Expert-E1-Repositioning-Booster-T1_23 \
   --agent.resume True \
   --wandb-checkpoint-name last \
-  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" 
-  
+  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>"
+```
+
+Resume E2 from W&B:
+
+```bash
+MJLAB_E2_RESET_CURRICULUM_STAGE=<1|2|3> \
+uv run train Mjlab-GK-Expert-E2-BlockDeflect-Booster-T1_23 \
+  --agent.resume True \
+  --wandb-checkpoint-name last \
+  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<run_id>"
 ```
 
 Notes:
-- `--wandb-checkpoint-name` accepts `latest`, `best`, `last`, or a concrete file such as `model_5000.pt`.
-- For E1 and E2, the curriculum stage is still controlled by `MJLAB_E1_RESET_CURRICULUM_STAGE` / `MJLAB_E2_RESET_CURRICULUM_STAGE` on the resumed launch.
+- `--wandb-checkpoint-name` accepts `latest`, `best`, `last`, or a concrete file such as `model_18000.pt`.
+- Curriculum stage is selected on launch through the corresponding reset environment variable.
 
-## E1 - SetSquare
+## E1 Repositioning
 
-Task ID: `Mjlab-GK-Expert-SetSquare-Booster-T1_23`
-
-### Sanity play (random policy)
-
-```bash
-uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
-  --agent random \
-  --no-fall-termination False \
-  --num-envs 1 \
-  --viewer native
-```
-
-### Train
-
-```bash
-MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
-uv run train Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
-  --env.scene.num-envs 4096 \
-  --agent.max_iterations 5000
-
-
-uv run python src/mjlab/scripts/auto_promote_gk_e1_curriculum.py \
-  --current-stage 1 \
-  --num-envs 4096 \
-  --train-iterations-per-stage 5000
-```
-
-Use `MJLAB_E1_RESET_CURRICULUM_STAGE=<1|2|3>` to select the E1 curriculum stage for that run.
-### Play trained policy
-
-```bash
-uv run play Mjlab-GK-Expert-SetSquare-Booster-T1_23 \
-  --viewer viser \
-  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" 
-```
-
-## E1V2 - Mezzaluna
-
-Task ID: `Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23`
+Task ID: `Mjlab-GK-Expert-E1-Repositioning-Booster-T1_23`
 
 ### Dry run
 
 ```bash
 MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
-uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
+uv run play Mjlab-GK-Expert-E1-Repositioning-Booster-T1_23 \
   --agent zero \
   --num-envs 1 \
   --viewer viser \
@@ -89,142 +58,72 @@ uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
 
 ```bash
 MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
-uv run train Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
+uv run train Mjlab-GK-Expert-E1-Repositioning-Booster-T1_23 \
   --env.scene.num-envs 4096 \
-  --agent.max_iterations 20000 
+  --agent.max_iterations 20000
+```
+
+### Continue training from W&B
+
+```bash
+MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
+uv run train Mjlab-GK-Expert-E1-Repositioning-Booster-T1_23 \
+  --agent.resume True \
+  --wandb-checkpoint-name model_18000.pt \
+  --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>" \
+  --agent.max-iterations 30000
 ```
 
 ### Play trained policy from W&B
 
 ```bash
 MJLAB_E1_RESET_CURRICULUM_STAGE=1 \
-uv run play Mjlab-GK-Expert-E1V2-Mezzaluna-Booster-T1_23 \
+uv run play Mjlab-GK-Expert-E1-Repositioning-Booster-T1_23 \
   --num-envs 1 \
   --viewer viser \
   --wandb-run-path "$ENTITY/e1_goalkeeper_expert/<run_id>"
 ```
 
-## E2 - StandBlock
+## E2 BlockDeflect
 
-Task ID: `Mjlab-GK-Expert-StandBlock-Booster-T1_23`
-
-### Sanity play (random policy)
-
-```bash
-uv run play Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
-  --agent random \
-  --no-fall-termination True \
-  --num-envs 1 \
-  --viewer viser
-```
-
-### Train
-
-```bash
-uv run train Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
-  --env.scene.num-envs 4096 \
-  --agent.max_iterations 5000
-```
-
-### E2 curriculum helper
-
-Start from stage 1:
-
-```bash
-uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
-  --current-stage 1 \
-  --num-envs 4096 \
-  --train-iterations-per-stage 7000 
-```
-
-Start from a previous W&B run:
-
-```bash
-uv run python src/mjlab/scripts/promote_gk_e2_curriculum.py \
-  --current-stage 1 \
-  --num-envs 4096 \
-  --train-iterations-per-stage 5000 \
-  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<old_run_id>" \
-```
-
-### Play trained policy
-
-```bash
-MJLAB_E2_RESET_CURRICULUM_STAGE=1
-uv run play Mjlab-GK-Expert-StandBlock-Booster-T1_23 \
-  --num-envs 1 \
-  --viewer viser \
-  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<run_id>" 
-```
-
-### Launcher validation
-
-```bash
-uv run python src/mjlab/scripts/validate_gk_e2_launcher.py \
-  --num-resets 200 \
-  --num-envs 4096
-```
-
-## E2V2 - Mezzaluna
-
-Task ID: `Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23`
+Task ID: `Mjlab-GK-Expert-E2-BlockDeflect-Booster-T1_23`
 
 ### Dry run
 
 ```bash
-MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=2 \
-uv run play Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
+MJLAB_E2_RESET_CURRICULUM_STAGE=2 \
+uv run play Mjlab-GK-Expert-E2-BlockDeflect-Booster-T1_23 \
   --agent zero \
   --num-envs 1 \
   --viewer viser
 ```
 
-### Train stage 2 from zero
+### Train from zero
 
 ```bash
-MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=1 \
-uv run train Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
-  --agent.run-name e2v2_mezzaluna_stage2_from_scratch \
+MJLAB_E2_RESET_CURRICULUM_STAGE=1 \
+uv run train Mjlab-GK-Expert-E2-BlockDeflect-Booster-T1_23 \
+  --agent.run-name e2_block_deflect_stage2_from_scratch \
   --agent.max-iterations 30000 \
   --env.scene.num-envs 4096
+```
+
+### Continue training from W&B
+
+```bash
+MJLAB_E2_RESET_CURRICULUM_STAGE=2 \
+uv run train Mjlab-GK-Expert-E2-BlockDeflect-Booster-T1_23 \
+  --agent.resume True \
+  --wandb-checkpoint-name last \
+  --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<run_id>"
 ```
 
 ### Play trained policy from W&B
 
 ```bash
-MJLAB_E2V2_MEZZALUNA_RESET_CURRICULUM_STAGE=2 \
-uv run play Mjlab-GK-Expert-E2V2-Mezzaluna-Booster-T1_23 \
+MJLAB_E2_RESET_CURRICULUM_STAGE=2 \
+uv run play Mjlab-GK-Expert-E2-BlockDeflect-Booster-T1_23 \
   --num-envs 1 \
   --viewer viser \
   --wandb-run-path "$ENTITY/e2_goalkeeper_expert/<run_id>"
-```
-
-## E3 - ClearAway
-
-Task ID: `Mjlab-GK-Expert-ClearAway-Booster-T1_23`
-
-### Sanity play (random policy)
-
-```bash
-uv run play Mjlab-GK-Expert-ClearAway-Booster-T1_23 \
-  --agent random \
-  --no-fall-termination True \
-  --num-envs 1 \
-  --viewer native
-```
-
-### Train
-
-```bash
-uv run train Mjlab-GK-Expert-ClearAway-Booster-T1_23 \
-  --env.scene.num-envs 4096 \
-  --agent.max_iterations 500
-```
-
-### Play trained policy
-
-```bash
-uv run play Mjlab-GK-Expert-ClearAway-Booster-T1_23 \
-  --num-envs 1 \
-  --wandb-run-path "$ENTITY/e3_goalkeeper_expert/<run_id>" 
 ```

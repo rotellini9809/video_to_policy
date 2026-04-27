@@ -1,6 +1,6 @@
 # Goalkeeper Experts – Drill Environment Plan (No Dives)
 
-This canvas is a working plan to define **Stage 2 expert drill environments** for the goalkeeper pipeline (paper-style drills → priors → final policy). It is meant to be edited iteratively.
+This canvas is a working plan for the active goalkeeper expert drill environments in this repo: **E1** and **E2**. Earlier legacy task generations and `E3` have been removed.
 
 ---
 
@@ -60,7 +60,7 @@ Used to give the keeper a brief “set” moment before the shot begins.
 - Phase B (shot start): ball is launched
 
 How to use it:
-- **E1 (Set & Square):** use delayed launch often; optionally **terminate the drill at shot start** (or within a very short window) to isolate readiness rather than saving.
+- **E1 Repositioning:** use delayed launch often; optionally **terminate the drill at shot start** (or within a very short window) to isolate readiness rather than saving.
 
 Suggested mix:
 - **E1:** 70–80% delayed launch, 20–30% immediate (optional)
@@ -89,11 +89,9 @@ Use this to:
 ### Semantic definition of the experts (what each one *means*)
 These definitions are the *behavioral intent* of each expert. The drill environment below is then designed to isolate that intent.
 
-- **E1 — Set & Square (Ready + Track, no translation):** Stay in a goalkeeper-ready stance, keep trunk upright and **yaw aligned to the ball**, make only micro-adjustments. Translation is treated as an error.
+- **E1 Repositioning (Ready + Track, no translation):** Stay in a goalkeeper-ready stance, keep trunk upright and **yaw aligned to the ball**, make only micro-adjustments. Translation is treated as an error.
 
-- **E2 — Stand Block / Deflect (No-dive save mechanics):** **Stop it now** (commit / save mechanics). The ball is close enough / fast enough that repositioning is mostly over; the key is body barrier + contact mechanics. Success is measured by preventing a goal and producing a good deflection away from goal. You’re training bracing + limb placement + torso orientation (still no dives), not “nice shuffles”.
-
-- **E3 — Clear Away (Kick / Punch / Body):** After contact or with a loose ball in the danger zone, take **decisive actions** that send the ball away and **increase distance-from-goal over time**. Any modality is valid (kick, punch, body).
+- **E2 Block Deflect (No-dive save mechanics):** **Stop it now** (commit / save mechanics). The ball is close enough / fast enough that repositioning is mostly over; the key is body barrier + contact mechanics. Success is measured by preventing a goal and producing a good deflection away from goal. You’re training bracing + limb placement + torso orientation (still no dives), not “nice shuffles”.
 
 Each drill must define:
 - Reset distribution (keeper, ball)
@@ -104,7 +102,7 @@ Each drill must define:
 
 ---
 
-## E1 — Set & Square (Ready + Track, no translation)
+## E1 Repositioning (Ready + Track, no translation)
 
 ### Purpose
 Hold a goalkeeper-ready stance, keep trunk upright and **yaw aligned to the ball**, and make only micro-adjustments. **Base translation is treated as an error.**
@@ -185,7 +183,7 @@ Notes:
 
 ---
 
-## E2 — Stand Block / Deflect (No-dive save mechanics)
+## E2 Block Deflect (No-dive save mechanics)
 
 ### Purpose
 **Stop it now** (commit / save mechanics). The ball is close enough / fast enough that repositioning is mostly over; the key is **body barrier + contact mechanics**.
@@ -221,53 +219,7 @@ Notes:
 
 ### Termination
 - Goal / timeout
-- Optional: stop after first contact to isolate “block” (then E3 handles aftermath)
-
----
-
-## E3 — Clear Away (Kick / Punch / Body)
-
-### Purpose
-After contact or with a loose ball in the danger zone, take **decisive actions** that send the ball away and **increase distance-from-goal over time**.
-
-### Reset distribution (mix variants)
-This expert should not depend on having run E2 first. Instead, reset into states that *look like* “after contact” or “loose ball in danger.”
-
-Variant A — Loose ball in danger zone:
-- Ball starts inside DZ with low speed (rolling or nearly stopped)
-- Keeper is standing within ~0.5–1.0 m
-
-Variant B — Post-contact / rebound setup (“after contact” without simulating E2):
-- Place ball very near a plausible contact surface (foot/shin/hand/forearm/torso front)
-- Give it a small random rebound velocity (or 0)
-- Keeper starts standing but slightly perturbed/unbalanced
-
-### Environment mechanics (clear and make safe)
-- Ball is physical and colliding.
-- Terminate early when the **clear condition** is satisfied (ball is safe), not merely when touched.
-- Randomize contact side (L/R), rebound velocity, friction/rolling resistance, and ball starting offset.
-
-### Horizon
-- **Max horizon (T_max): 2.5 s**
-- Typically ends earlier once the clear condition is satisfied
-
-### Observations
-- Proprioception
-- Ball relative position and velocity
-- Privileged (optional): clear direction target (e.g., to sideline)
-
-### Reward
-- Primary: increase ball distance from goal over time (progress term)
-- + bonus for exiting danger zone
-- + bonus for ball velocity away from goal
-- − fall
-- − leave GK area (keep discipline)
-
-### Termination
-- Ball “safe” (clear condition) OR timeout OR goal
-
-Clear condition (suggested):
-- Ball outside DZ AND (distance-to-goal increasing for N steps OR strong away-from-goal velocity)
+- Optional: stop after first contact to isolate “block” and keep the task focused on the save event.
 
 ---
 
@@ -276,15 +228,13 @@ Clear condition (suggested):
 - Max horizons (T_max) + event-based early termination:
   - E1: 3.0 s
   - E2: 2 s
-  - E3: 2.5 s
 
 - Launch / reset distributions:
   - E1: visual-only / slow ball, **optionally with delayed launch (0.2–0.5 s pre-shot) terminating at shot start**
   - E2: committed, mostly on-target ground shots (no-dive reachable band)
-  - E3: loose-ball-in-danger + post-contact rebound resets
 
 - Collisions:
-  - E1/E2/E3: physical and colliding
+  - E1/E2: physical and colliding
 
 - Constraints:
   - Strong GK-area penalties across all drills

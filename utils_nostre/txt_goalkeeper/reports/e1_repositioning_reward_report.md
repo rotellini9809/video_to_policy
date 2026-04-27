@@ -1,8 +1,8 @@
-# E1V2 Mezzaluna Reward Report
+# E1 Repositioning Reward Report
 
-This report reflects the current `e1V2_mezzaluna` implementation in:
-- `mjlab/src/mjlab/tasks/goalkeeper_experts/e1V2_mezzaluna/config/t1_23dof/env_cfgs.py`
-- `mjlab/src/mjlab/tasks/goalkeeper_experts/e1V2_mezzaluna/mdp.py`
+This report reflects the current `e1_repositioning` implementation in:
+- `mjlab/src/mjlab/tasks/goalkeeper_experts/e1_repositioning/config/t1_23dof/env_cfgs.py`
+- `mjlab/src/mjlab/tasks/goalkeeper_experts/e1_repositioning/mdp.py`
 - `mjlab/src/mjlab/managers/reward_manager.py`
 
 ## Reward Model
@@ -138,7 +138,7 @@ Reward target:
 - if the ball moves behind the ellipse center, only the ray `x` component is reflected, so the target stays on the same upper/lower side of the arc
 
 Reward active mask:
-- in `e1V2_mezzaluna`, the reward active mask is currently always on
+- in `e1_repositioning`, the reward active mask is currently always on
 
 Alignment ramp:
 - some stance terms use `_alignment_home_ramp(...)`

@@ -1,8 +1,8 @@
-# E2V2 Mezzaluna Reward Report
+# E2 Block Deflect Reward Report
 
-This report reflects the current `e2v2_mezzaluna` implementation in:
-- `mjlab/src/mjlab/tasks/goalkeeper_experts/e2v2_mezzaluna/config/t1_23dof/env_cfgs.py`
-- `mjlab/src/mjlab/tasks/goalkeeper_experts/e2v2_mezzaluna/mdp.py`
+This report reflects the current `e2_block_deflect` implementation in:
+- `mjlab/src/mjlab/tasks/goalkeeper_experts/e2_block_deflect/config/t1_23dof/env_cfgs.py`
+- `mjlab/src/mjlab/tasks/goalkeeper_experts/e2_block_deflect/mdp.py`
 - `mjlab/src/mjlab/managers/reward_manager.py`
 
 ## Reward Model
@@ -41,13 +41,13 @@ Relevant constants from `env_cfgs.py`:
 - upright target: `roll_band=0.10`, `roll_sigma=0.12`, `pitch_target=0.10`, `pitch_band=0.25`, `pitch_sigma=0.30`
 
 Current launcher curriculum presets:
-- stage 1: `e2v2_mezzaluna_stage1_ground_only`
-- stage 2: `e2v2_mezzaluna_stage2_ground_long_driven`
-- stage 3: `e2v2_mezzaluna_stage3_long_driven_only`
+- stage 1: `e2_block_deflect_stage1_ground_only`
+- stage 2: `e2_block_deflect_stage2_ground_long_driven`
+- stage 3: `e2_block_deflect_stage3_long_driven_only`
 
 Legacy preset aliases are still normalized to stage 2:
-- `e2v2_mezzaluna_stage1_ground`
-- `e2v2_mezzaluna_stage2_ground_air`
+- `e2_block_deflect_stage1_ground`
+- `e2_block_deflect_stage2_ground_air`
 
 ## Current Weighted Reward Set
 
@@ -141,4 +141,4 @@ Important interactions:
 
 ## Launcher Notes
 
-This task no longer uses the old E2 launcher presets. The active E2V2 launcher presets are defined locally in the E2V2 task config, and preset selection now resolves to the canonical stage names before launcher parameters are applied.
+This task uses only the local E2 launcher presets defined in the E2 task config, and preset selection resolves to the canonical stage names before launcher parameters are applied.
