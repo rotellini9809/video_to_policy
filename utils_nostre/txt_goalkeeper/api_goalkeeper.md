@@ -163,6 +163,79 @@ uv run play Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
   --wandb-run-path "$ENTITY/goalkeeper_expert/<run_id>"
 ```
 
+## E2 From Efin Snapshots
+
+Task ID: `Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23`
+
+This task trains an E2-style keeper from Efin handoff snapshots. The environment resets from snapshots captured when Efin enters `approach_danger`, then continues with Efin's `continuous_ball` dynamics while using an E2-like reward surface.
+
+Files:
+- task registration: `mjlab/src/mjlab/tasks/goalkeeper_experts/e2_from_efin_snapshots/config/t1_23dof/task.py`
+- env config and rewards: `mjlab/src/mjlab/tasks/goalkeeper_experts/e2_from_efin_snapshots/config/t1_23dof/env_cfgs.py`
+- snapshot reset logic: `mjlab/src/mjlab/tasks/goalkeeper_experts/efin_continuous_goalkeeper/mdp.py`
+- snapshot collector: `mjlab/src/mjlab/scripts/collect_efin_approach_snapshots.py`
+
+### Collect Efin approach snapshots with an E1 actor
+
+```bash
+uv run collect-efin-approach-snapshots \
+  --wandb-run-path-e1 "$ENTITY/e1_goalkeeper_expert/<run_id_e1>" \
+  --wandb-checkpoint-name-e1 latest \
+  --stage1-goalkeeper-run-path "$MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER" \
+  --num-envs 64 \
+  --num-snapshots 10000 \
+  --output-dir ./data/goalkeeper_teacher_switch/efin_approach_snapshots
+```
+
+The collector rejects unhealthy snapshots by default:
+- robot height `< 0.32`
+- absolute roll `> 100 deg`
+- absolute joint velocity `> 20`
+- robot outside a rough keeper-area sanity box
+
+### Train from snapshots
+
+```bash
+MJLAB_EFIN_SNAPSHOT_DATASET_PATH=./data/goalkeeper_teacher_switch/efin_approach_snapshots/efin_approach_snapshots.npz \
+uv run train Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23 \
+  --env.scene.num-envs 4096 \
+  --agent.max-iterations 20000
+```
+
+Inside the Docker container, use the container path:
+
+```bash
+MJLAB_EFIN_SNAPSHOT_DATASET_PATH=/app/data/goalkeeper_teacher_switch/efin_approach_snapshots/efin_approach_snapshots.npz \
+uv run train Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23 \
+  --env.scene.num-envs 4096 \
+  --agent.max-iterations 20000
+```
+
+### Play trained policy from W&B
+
+```bash
+MJLAB_EFIN_SNAPSHOT_DATASET_PATH=/app/data/goalkeeper_teacher_switch/efin_approach_snapshots/efin_approach_snapshots.npz \
+uv run play Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23 \
+  --num-envs 1 \
+  --viewer viser \
+  --wandb-run-path "$ENTITY/goalkeeper_expert/<run_id>"
+```
+
+
+### Continue training from W&B
+
+Resume with the same snapshot dataset path:
+
+```bash
+MJLAB_EFIN_SNAPSHOT_DATASET_PATH=/app/data/goalkeeper_teacher_switch/efin_approach_snapshots/efin_approach_snapshots.npz \
+uv run train Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23 \
+  --agent.resume True \
+  --wandb-run-path "$ENTITY/goalkeeper_expert/<run_id>" \
+  --wandb-checkpoint-name latest \
+  --agent.max-iterations 40000
+```
+
+
 ## Efin Teacher-Switch Distillation Data
 
 Script: `src/mjlab/scripts/collect_efin_teacher_switch_rollouts.py`
