@@ -211,7 +211,7 @@ If `--output-dir` is omitted, the script skips collection and starts the live mi
 uv run python src/mjlab/scripts/collect_efin_teacher_switch_rollouts.py \
   --wandb-run-path-e1 "$ENTITY/e1_goalkeeper_expert/<run_id_e1>" \
   --wandb-run-path-e2 "$ENTITY/e2_goalkeeper_expert/<run_id_e2>" \
-  --efin-curriculum-stage 2 \
+  --efin-curriculum-stage 1 \
   --viewer viser
 ```
 
