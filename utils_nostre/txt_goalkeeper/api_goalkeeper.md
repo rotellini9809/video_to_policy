@@ -200,16 +200,9 @@ MJLAB_EFIN_SNAPSHOT_DATASET_PATH=./data/goalkeeper_teacher_switch/efin_approach_
 uv run train Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23 \
   --env.scene.num-envs 4096 \
   --agent.max-iterations 20000
+  --agent.clip-actions 3.0
 ```
 
-Inside the Docker container, use the container path:
-
-```bash
-MJLAB_EFIN_SNAPSHOT_DATASET_PATH=/app/data/goalkeeper_teacher_switch/efin_approach_snapshots/efin_approach_snapshots.npz \
-uv run train Mjlab-GK-Expert-E2-FromEfinSnapshots-Booster-T1_23 \
-  --env.scene.num-envs 4096 \
-  --agent.max-iterations 20000
-```
 
 ### Play trained policy from W&B
 
