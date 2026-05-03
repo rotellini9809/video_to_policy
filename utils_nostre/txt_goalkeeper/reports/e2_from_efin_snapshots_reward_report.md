@@ -40,31 +40,31 @@ Relevant constants:
 - clearance danger window: `x in [5.05, 7.15]`, `y in [-2.7, 2.7]`
 - outside-area bounds: `x in [5.2, 6.8]`, `y in [-2.3, 2.3]`
 - outside-area visual cue: `efin_snapshot_outside_area_overlay`, drawn in viewer group `3` with the Efin keeper spawn overlay
-- contact resolution window: `RESOLUTION_WINDOW_S = 3.0`
+- post-contact outcome window: `RESOLUTION_WINDOW_S = 3.0`
 - fall indicator: base height `< 0.32` or absolute roll `> 100 deg`
 
 ## Current Weighted Reward Set
 
 Current reward-rate expression:
 
-`R_rate = -500.0*goal_conceded -0.005*action_rate_l2 +180.0*save_success +0.0*deflect_away +20.0*arm_high_throw_deflect_reward +5.0*clearance_quality +2.0*stabilize_after_exit +3.0*face_ball_after_exit_reward -3.5*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -100.0*head_contact_penalty -90.0*outside_area -90.0*fallen`
+`R_rate = -500.0*goal_conceded -0.005*action_rate_l2 +1000.0*save_success +0.0*deflect_away +20.0*arm_contact_on_high_shot +5.0*clearance_quality +2.0*stabilize_after_exit +3.0*face_ball_after_exit -3.5*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -100.0*head_contact_penalty -90.0*outside_keeper_area -90.0*fallen`
 
 | Term | Weight | Type | Main role |
 |---|---:|---|---|
 | `goal_conceded` | `-500.0` | binary event | Large failure signal when the ball enters the defended goal |
 | `action_rate_l2` | `-0.005` | dense penalty | Smooth control regularization on latent actions |
-| `save_success` | `+180.0` | binary event | Main positive outcome reward when the contact resolution window finishes without a conceded goal |
+| `save_success` | `+1000.0` | binary event | Main positive outcome reward when the post-contact outcome window finishes without a conceded goal, or when `fallen` fires after first ball contact without a conceded goal |
 | `deflect_away` | `0.0` | first-contact event | Present but currently off; would reward first-contact ball velocity away from goal |
-| `arm_high_throw_deflect_reward` | `+20.0` | contact event | Bonus for useful arm-ball contact when `shot_target_z >= 0.45` |
+| `arm_contact_on_high_shot` | `+20.0` | contact event | Bonus for useful arm-ball contact when `shot_target_z >= 0.45` |
 | `clearance_quality` | `+5.0` | latched event | Small one-shot reward for clearing the ball out of the danger window with velocity away from goal |
 | `stabilize_after_exit` | `+2.0` | post-exit dense | After danger-window exit, rewards upright posture and healthy base height |
-| `face_ball_after_exit_reward` | `+3.0` | post-exit dense | After danger-window exit, rewards turning back toward the ball |
+| `face_ball_after_exit` | `+3.0` | post-exit dense | After danger-window exit, rewards turning back toward the ball |
 | `low_height_soft_penalty` | `-3.5` | dense penalty | Penalizes sagging below `h_soft = 0.55` |
 | `joint_pos_limits` | `-0.35` | dense penalty | Penalizes joint-limit pressure |
 | `upright` | `+2.0` | dense reward | Continuous torso roll/pitch posture shaping |
 | `body_ang_vel` | `-0.01` | dense penalty | Penalizes large root angular velocity |
 | `head_contact_penalty` | `-100.0` | contact event | Strongly discourages head contact with the ball |
-| `outside_area` | `-90.0` | dense penalty | Penalizes leaving the Efin keeper spawn area |
+| `outside_keeper_area` | `-90.0` | dense penalty | Penalizes leaving the Efin keeper spawn area |
 | `fallen` | `-90.0` | binary indicator | Large per-step penalty when the robot is effectively down |
 
 ## Clearance Quality
@@ -112,7 +112,7 @@ The post-exit latch activates only after the ball exits the danger window after 
 
 This term does not penalize body linear or angular speed.
 
-`face_ball_after_exit_reward`:
+`face_ball_after_exit`:
 - active only after danger-window exit
 - full score inside a `12 deg` yaw deadband
 - decays with `sigma = 25 deg` outside the deadband
@@ -124,7 +124,7 @@ Current terminations:
 - `nan_detection`
 - `goal_conceded`
 - `outside_field`
-- `contact_resolution_window`
+- `post_contact_outcome_window`
 - `fallen`
 
-`contact_resolution_window` is the key save-success termination: after robot-ball contact, the episode waits up to the resolution window and then decides whether the save succeeded or the goal was conceded.
+`post_contact_outcome_window` is the key save-success termination: after robot-ball contact, the episode waits up to the resolution window and then decides whether the save succeeded or the goal was conceded.
