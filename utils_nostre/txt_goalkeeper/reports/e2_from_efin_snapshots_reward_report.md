@@ -38,7 +38,8 @@ This task starts from Efin approach snapshots rather than from the beginning of 
 
 Relevant constants:
 - clearance danger window: `x in [5.05, 7.15]`, `y in [-2.7, 2.7]`
-- E2 keeper area bounds: `x in [5.2, 7.6]`, `y in [-2.0, 2.0]`
+- outside-area bounds: `x in [5.2, 6.8]`, `y in [-2.3, 2.3]`
+- outside-area visual cue: `efin_snapshot_outside_area_overlay`, drawn in viewer group `3` with the Efin keeper spawn overlay
 - contact resolution window: `RESOLUTION_WINDOW_S = 3.0`
 - fall indicator: base height `< 0.32` or absolute roll `> 100 deg`
 
@@ -46,7 +47,7 @@ Relevant constants:
 
 Current reward-rate expression:
 
-`R_rate = -500.0*goal_conceded -0.005*action_rate_l2 +180.0*save_success +0.0*deflect_away +20.0*arm_high_throw_deflect_reward +5.0*clearance_quality +2.0*stabilize_after_exit +3.0*face_ball_after_exit_reward -3.5*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -100.0*head_contact_penalty -10.0*outside_area -90.0*fallen`
+`R_rate = -500.0*goal_conceded -0.005*action_rate_l2 +180.0*save_success +0.0*deflect_away +20.0*arm_high_throw_deflect_reward +5.0*clearance_quality +2.0*stabilize_after_exit +3.0*face_ball_after_exit_reward -3.5*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -100.0*head_contact_penalty -90.0*outside_area -90.0*fallen`
 
 | Term | Weight | Type | Main role |
 |---|---:|---|---|
@@ -63,7 +64,7 @@ Current reward-rate expression:
 | `upright` | `+2.0` | dense reward | Continuous torso roll/pitch posture shaping |
 | `body_ang_vel` | `-0.01` | dense penalty | Penalizes large root angular velocity |
 | `head_contact_penalty` | `-100.0` | contact event | Strongly discourages head contact with the ball |
-| `outside_area` | `-10.0` | dense penalty | Penalizes leaving the E2 keeper operating box |
+| `outside_area` | `-90.0` | dense penalty | Penalizes leaving the Efin keeper spawn area |
 | `fallen` | `-90.0` | binary indicator | Large per-step penalty when the robot is effectively down |
 
 ## Clearance Quality
