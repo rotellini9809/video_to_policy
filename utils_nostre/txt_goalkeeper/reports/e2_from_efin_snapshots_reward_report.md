@@ -30,7 +30,7 @@ Current `RewardManager` behavior:
 - episodic reward logs are normalized by episode length in seconds
 
 Current zero-weight configured terms:
-- `deflect_away`
+- none
 
 ## Task Context
 
@@ -47,14 +47,14 @@ Relevant constants:
 
 Current reward-rate expression:
 
-`R_rate = -500.0*goal_conceded -0.005*action_rate_l2 +1000.0*save_success +0.0*deflect_away +20.0*arm_contact_on_high_shot +5.0*clearance_quality +2.0*stabilize_after_exit +3.0*face_ball_after_exit -3.5*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -100.0*head_contact_penalty -90.0*outside_keeper_area -90.0*fallen`
+`R_rate = -350.0*goal_conceded -0.005*action_rate_l2 +300.0*save_success +8.0*deflect_away +20.0*arm_contact_on_high_shot +5.0*clearance_quality +2.0*stabilize_after_exit +3.0*face_ball_after_exit -3.5*low_height_soft_penalty -0.35*joint_pos_limits +2.0*upright -0.01*body_ang_vel -100.0*head_contact_penalty -70.0*outside_keeper_area -70.0*fallen`
 
 | Term | Weight | Type | Main role |
 |---|---:|---|---|
-| `goal_conceded` | `-500.0` | binary event | Large failure signal when the ball enters the defended goal |
+| `goal_conceded` | `-350.0` | binary event | Large failure signal when the ball enters the defended goal |
 | `action_rate_l2` | `-0.005` | dense penalty | Smooth control regularization on latent actions |
-| `save_success` | `+1000.0` | binary event | Main positive outcome reward when the post-contact outcome window finishes without a conceded goal, or when `fallen` fires after first ball contact without a conceded goal |
-| `deflect_away` | `0.0` | first-contact event | Present but currently off; would reward first-contact ball velocity away from goal |
+| `save_success` | `+300.0` | binary event | Main positive outcome reward when the post-contact outcome window finishes without a conceded goal, or when `fallen` fires after first ball contact without a conceded goal |
+| `deflect_away` | `+8.0` | first-contact event | Rewards first-contact ball XY velocity projected away from the goal center, clipped at `1.0 m/s` |
 | `arm_contact_on_high_shot` | `+20.0` | contact event | Bonus for useful arm-ball contact when `shot_target_z >= 0.45` |
 | `clearance_quality` | `+5.0` | latched event | Small one-shot reward for clearing the ball out of the danger window with velocity away from goal |
 | `stabilize_after_exit` | `+2.0` | post-exit dense | After danger-window exit, rewards upright posture and healthy base height |
@@ -64,8 +64,8 @@ Current reward-rate expression:
 | `upright` | `+2.0` | dense reward | Continuous torso roll/pitch posture shaping |
 | `body_ang_vel` | `-0.01` | dense penalty | Penalizes large root angular velocity |
 | `head_contact_penalty` | `-100.0` | contact event | Strongly discourages head contact with the ball |
-| `outside_keeper_area` | `-90.0` | dense penalty | Penalizes leaving the Efin keeper spawn area |
-| `fallen` | `-90.0` | binary indicator | Large per-step penalty when the robot is effectively down |
+| `outside_keeper_area` | `-70.0` | dense penalty | Penalizes leaving the Efin keeper spawn area |
+| `fallen` | `-70.0` | binary indicator | Large per-step penalty when the robot is effectively down |
 
 ## Clearance Quality
 
