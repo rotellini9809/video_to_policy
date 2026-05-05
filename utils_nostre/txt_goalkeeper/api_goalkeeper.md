@@ -181,7 +181,6 @@ Files:
 uv run collect-efin-approach-snapshots \
   --wandb-run-path-e1 "$ENTITY/e1_goalkeeper_expert/<run_id_e1>" \
   --wandb-checkpoint-name-e1 latest \
-  --stage1-goalkeeper-run-path "$MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER" \
   --num-envs 64 \
   --num-snapshots 10000 \
   --output-dir ./data/goalkeeper_teacher_switch/efin_approach_snapshots
