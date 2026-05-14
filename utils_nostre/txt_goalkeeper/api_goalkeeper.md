@@ -160,7 +160,7 @@ uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
 uv run play Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
   --num-envs 1 \
   --viewer viser \
-  --wandb-run-path "$ENTITY/goalkeeper_expert/<run_id>"
+  --wandb-run-path "$ENTITY/efin_goalkeeper/<run_id>"
 ```
 
 ## E2 From Efin Snapshots
@@ -285,3 +285,76 @@ Notes:
 - `teacher_id=0` means E1, `teacher_id=1` means E2.
 - If `--output-dir` is set, viewer mode starts a fresh live mixed-teacher rollout after collection; it is not a replay of the saved dataset.
 - If `--output-dir` is not set, no collection happens.
+
+## Efin Online Kickstarting
+
+This trains Efin with normal PPO while adding an auxiliary frozen-teacher loss from E1/E2. The simulator is always stepped with Efin's own sampled action. E1/E2 only provide a latent `motor_latent` target for the actor mean, and the critic still learns only from Efin rewards.
+
+Files:
+- teacher wrapper, rollout storage, PPO loss, runner: `mjlab/src/mjlab/tasks/goalkeeper_experts/efin_continuous_goalkeeper/kickstart.py`
+- config knobs: `mjlab/src/mjlab/tasks/goalkeeper_experts/efin_continuous_goalkeeper/config/t1_23dof/rl_cfg.py`
+
+Switching logic:
+- E1 teacher during normal positioning.
+- Switch to E2 when Efin enters `SHOT`.
+- Switch back to E1 after the ball has entered the danger area on E2 and then leaves the danger area.
+- No multi-throw or juggling logic is added here.
+
+### Train Efin with online E1/E2 kickstarting
+
+```bash
+uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
+  --env.scene.num-envs 4096 \
+  --agent.max-iterations 40000 \
+  --agent.teacher-distill.enabled True \
+  --agent.teacher-distill.wandb-run-path-e1 "$ENTITY/e1_goalkeeper_expert/<run_id_e1>" \
+  --agent.teacher-distill.wandb-run-path-e2 "$ENTITY/e2_goalkeeper_expert/<run_id_e2>" \
+  --agent.teacher-distill.wandb-checkpoint-name-e1 latest \
+  --agent.teacher-distill.wandb-checkpoint-name-e2 latest
+```
+
+### Distillation schedule
+
+Default schedule:
+
+```text
+lambda_distill_initial = 1.0
+lambda_distill_final = 0.0
+lambda_distill_decay_start_iter = 10000
+lambda_distill_decay_end_iter = 20000
+```
+
+Override from the command line:
+
+```bash
+uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
+  --agent.teacher-distill.enabled True \
+  --agent.teacher-distill.wandb-run-path-e1 "$ENTITY/e1_goalkeeper_expert/<run_id_e1>" \
+  --agent.teacher-distill.wandb-run-path-e2 "$ENTITY/e2_goalkeeper_expert/<run_id_e2>" \
+  --agent.algorithm.lambda-distill-initial 1.0 \
+  --agent.algorithm.lambda-distill-final 0.0 \
+  --agent.algorithm.lambda-distill-decay-start-iter 10000 \
+  --agent.algorithm.lambda-distill-decay-end-iter 20000
+```
+
+Disable kickstarting by leaving it off, or explicitly:
+
+```bash
+--agent.teacher-distill.enabled False
+```
+
+### W&B distillation metrics
+
+- `distill/lambda`
+- `distill/teacher_loss`
+- `distill/action_mse_total`
+- `distill/action_mse_e1`
+- `distill/action_mse_e2`
+- `distill/teacher_phase_e1_frac`
+- `distill/teacher_phase_e2_frac`
+- `distill/mask_frac`
+
+Notes:
+- E1/E2 checkpoint action dimensions must match the Efin `motor_latent` action dimension.
+- The teacher target is the latent action, not the decoded 23-DoF joint action.
+- `teacher_phase_e1_frac` is expected to be higher than `teacher_phase_e2_frac` because full Efin episodes spend more time in positioning than in save/block behavior.
