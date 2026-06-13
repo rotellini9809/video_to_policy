@@ -136,19 +136,57 @@ Notes:
 - This task currently uses a scripted stochastic ball state machine.
 - It uses the same Stage-1 latent motor decoder path as E1/E2, so `MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER` is required unless passed explicitly to helper scripts.
 - Current phases are `play_move -> approach_danger -> shot -> post_shot_timeout`.
+- Select the Efin reset curriculum with `MJLAB_EFIN_RESET_CURRICULUM_STAGE=1` or `2`.
 
 ### Dry run
 
 ```bash
+MJLAB_EFIN_RESET_CURRICULUM_STAGE=1 \
 uv run play Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
   --agent zero \
   --num-envs 1 \
   --viewer viser
 ```
 
+### How to play Efin
+
+Play a trained Efin policy from W&B:
+
+```bash
+MJLAB_EFIN_RESET_CURRICULUM_STAGE=2 \
+uv run play Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
+  --num-envs 1 \
+  --viewer viser \
+  --wandb-run-path "$ENTITY/efin_goalkeeper/<run_id>"
+```
+
+Use `MJLAB_EFIN_RESET_CURRICULUM_STAGE=1` for the easier positioning/play-move curriculum, or `2` for the full continuous goalkeeper episode.
+
+Record a short Efin video instead of opening the viewer:
+
+```bash
+MJLAB_EFIN_RESET_CURRICULUM_STAGE=2 \
+uv run play Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
+  --num-envs 1 \
+  --video \
+  --video-length 300 \
+  --wandb-run-path "$ENTITY/efin_goalkeeper/<run_id>"
+```
+
+Play the live mixed E1/E2 teacher controller inside the Efin environment:
+
+```bash
+uv run python src/mjlab/scripts/collect_efin_teacher_switch_rollouts.py \
+  --wandb-run-path-e1 "$ENTITY/e1_goalkeeper_expert/<run_id_e1>" \
+  --wandb-run-path-e2 "$ENTITY/e2_goalkeeper_expert/<run_id_e2>" \
+  --efin-curriculum-stage 2 \
+  --viewer viser
+```
+
 ### Train from zero
 
 ```bash
+MJLAB_EFIN_RESET_CURRICULUM_STAGE=1 \
 uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
   --env.scene.num-envs 256 \
   --agent.max-iterations 1000
@@ -157,6 +195,7 @@ uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
 ### Play trained policy from W&B
 
 ```bash
+MJLAB_EFIN_RESET_CURRICULUM_STAGE=2 \
 uv run play Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
   --num-envs 1 \
   --viewer viser \
@@ -287,7 +326,19 @@ Notes:
 
 ## Efin Online Kickstarting
 
-This trains Efin with normal PPO while adding an auxiliary frozen-teacher loss from E1/E2. The simulator is always stepped with Efin's own sampled action. E1/E2 only provide a latent `motor_latent` target for the actor mean, and the critic still learns only from Efin rewards.
+This trains Efin with a blend of normal PPO and an auxiliary frozen-teacher loss from E1/E2. The simulator is always stepped with Efin's own sampled action. E1/E2 only provide a latent `motor_latent` target for the actor mean, and the critic still learns only from Efin rewards.
+
+Training loss:
+
+```text
+loss = lambda_distill * teacher_loss + (1 - lambda_distill) * loss_from_env_rewards
+```
+
+where `loss_from_env_rewards` is the usual PPO loss from Efin rewards:
+
+```text
+surrogate_loss + value_loss_coef * value_loss - entropy_coef * entropy
+```
 
 Files:
 - teacher wrapper, rollout storage, PPO loss, runner: `mjlab/src/mjlab/tasks/goalkeeper_experts/efin_continuous_goalkeeper/kickstart.py`
@@ -321,7 +372,10 @@ lambda_distill_initial = 1.0
 lambda_distill_final = 0.0
 lambda_distill_decay_start_iter = 10000
 lambda_distill_decay_end_iter = 20000
+lambda_distill_decay_rate = 5.0
 ```
+
+Between `lambda_distill_decay_start_iter` and `lambda_distill_decay_end_iter`, lambda follows an exact-endpoint exponential decay with smooth start/end easing. Higher `lambda_distill_decay_rate` values move teacher weight down earlier in the decay window; lower values make the curve closer to linear.
 
 Override from the command line:
 
@@ -333,7 +387,8 @@ uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23 \
   --agent.algorithm.lambda-distill-initial 1.0 \
   --agent.algorithm.lambda-distill-final 0.0 \
   --agent.algorithm.lambda-distill-decay-start-iter 10000 \
-  --agent.algorithm.lambda-distill-decay-end-iter 20000
+  --agent.algorithm.lambda-distill-decay-end-iter 20000 \
+  --agent.algorithm.lambda-distill-decay-rate 5.0
 ```
 
 Disable kickstarting by leaving it off, or explicitly:
@@ -345,7 +400,9 @@ Disable kickstarting by leaving it off, or explicitly:
 ### W&B distillation metrics
 
 - `distill/lambda`
+- `distill/env_reward_loss`
 - `distill/teacher_loss`
+- `distill/blended_loss`
 - `distill/action_mse_total`
 - `distill/action_mse_e1`
 - `distill/action_mse_e2`
@@ -357,3 +414,11 @@ Notes:
 - E1/E2 checkpoint action dimensions must match the Efin `motor_latent` action dimension.
 - The teacher target is the latent action, not the decoded 23-DoF joint action.
 - `teacher_phase_e1_frac` is expected to be higher than `teacher_phase_e2_frac` because full Efin episodes spend more time in positioning than in save/block behavior.
+
+
+
+
+
+
+
+MJLAB_STAGE1_WANDB_RUN_PATH_GOALKEEPER=fratelligpt-sapienza-universit-di-roma/motor_controller_stage1/yj0sz8wt uv run train Mjlab-GK-Expert-Efin-ContinuousGoalkeeper-Booster-T1_23   --env.scene.num-envs 4096   --env.commands.continuous_ball.curriculum-stage 2   --agent.max-iterations 65000   --agent.run-name efin_stage2_from_zero_lambda_like_1hi5g1wn   --agent.teacher-distill.enabled True   --agent.teacher-distill.wandb-run-path-e1 fratelligpt-sapienza-universit-di-roma/e1_goalkeeper_expert/y2gtpr8o   --agent.teacher-distill.wandb-run-path-e2 fratelligpt-sapienza-universit-di-roma/e2_goalkeeper_expert/ycvqkdsu   --agent.teacher-distill.wandb-checkpoint-name-e1 latest   --agent.teacher-distill.wandb-checkpoint-name-e2 latest   --agent.algorithm.lambda-distill-initial 1   --agent.algorithm.lambda-distill-final 0.0   --agent.algorithm.lambda-distill-decay-start-iter 8000   --agent.algorithm.lambda-distill-decay-end-iter 40000
